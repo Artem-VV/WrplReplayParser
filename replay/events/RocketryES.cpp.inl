@@ -72,6 +72,35 @@ std::vector<Rocket *> collect_all_rockets(ParserState &state) {
 }
 
 template<typename Callable>
+static void iterate_all_payloads_ecs_query(ecs::EntityManager &manager, Callable c);
+
+// Payload and jettisoned stores were collected by nobody, so whatever the game put
+// under those components never reached the caller even when its positions arrived.
+std::vector<Payload *> collect_all_payloads(ParserState &state) {
+  std::vector<Payload *> payloads;
+  iterate_all_payloads_ecs_query(state.g_entity_mgr, [&payloads](Payload &payload_component) {
+    if (!payload_component.positions.history().empty()) {
+      payloads.push_back(&payload_component);
+    }
+  });
+  return payloads;
+}
+
+template<typename Callable>
+static void iterate_all_jettisoned_ecs_query(ecs::EntityManager &manager, Callable c);
+
+std::vector<Jettisoned *> collect_all_jettisoned(ParserState &state) {
+  std::vector<Jettisoned *> jettisoned;
+  iterate_all_jettisoned_ecs_query(state.g_entity_mgr,
+                                   [&jettisoned](Jettisoned &jettisoned_component) {
+    if (!jettisoned_component.positions.history().empty()) {
+      jettisoned.push_back(&jettisoned_component);
+    }
+  });
+  return jettisoned;
+}
+
+template<typename Callable>
 static void iterate_all_bombs_ecs_query(ecs::EntityManager &manager, Callable c);
 
 std::vector<Bomb *> collect_all_bombs(ParserState &state) {

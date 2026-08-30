@@ -737,18 +737,43 @@ bool GMSync(ParserState &state, BitStream &bs) {
   return true;
 }
 
+// A store leaving a pylon can be registered as any of these four, and which one it
+// gets is not something the position packet says: it names the entity, not the kind.
+// ParseWeapon throws the position away when the component it asked for is missing,
+// so ask for the one the list is named after first and then for the rest. Payload
+// and jettisoned were asked for by nobody at all, which cost such a store its whole
+// trajectory.
+static Rocket *getAnyStore(ParserState &state, ecs::EntityId eid) {
+  if (auto *r = state.g_entity_mgr.getNullable<Rocket>(eid, ECS_HASH("rocket_component")))
+    return r;
+  if (auto *b = state.g_entity_mgr.getNullable<Rocket>(eid, ECS_HASH("bomb_component")))
+    return b;
+  if (auto *p = state.g_entity_mgr.getNullable<Rocket>(eid, ECS_HASH("payload_component")))
+    return p;
+  if (auto *j = state.g_entity_mgr.getNullable<Rocket>(eid, ECS_HASH("jettisoned_component")))
+    return j;
+  return state.g_entity_mgr.getNullable<Rocket>(eid, ECS_HASH("torpedo_component"));
+}
+
+
 Rocket *getRocket(ParserState &state, ecs::EntityId eid) {
-  return state.g_entity_mgr.getNullable<Rocket>(eid, ECS_HASH("rocket_component"));
+  if (auto *r = state.g_entity_mgr.getNullable<Rocket>(eid, ECS_HASH("rocket_component")))
+    return r;
+  return getAnyStore(state, eid);
 }
 
 
 Rocket *getBomb(ParserState &state, ecs::EntityId eid) {
-  return state.g_entity_mgr.getNullable<Rocket>(eid, ECS_HASH("bomb_component"));
+  if (auto *b = state.g_entity_mgr.getNullable<Rocket>(eid, ECS_HASH("bomb_component")))
+    return b;
+  return getAnyStore(state, eid);
 }
 
 
 Rocket *getTorpedo(ParserState &state, ecs::EntityId eid) {
-  return state.g_entity_mgr.getNullable<Rocket>(eid, ECS_HASH("torpedo_component"));
+  if (auto *t = state.g_entity_mgr.getNullable<Rocket>(eid, ECS_HASH("torpedo_component")))
+    return t;
+  return getAnyStore(state, eid);
 }
 
 typedef Rocket *(*get_weapon_cb)(ParserState &state, ecs::EntityId eid);

@@ -293,6 +293,62 @@ inline void iterate_all_rockets_ecs_query(ecs::EntityManager &manager, Callable 
     }
   );
 }
+static constexpr ecs::ComponentDesc iterate_all_payloads_ecs_query_comps[] =
+{
+//start of 1 rw components at [0]
+  {ECS_HASH("payload_component"), ecs::ComponentTypeInfo<Payload>()}
+};
+static ecs::CompileTimeQueryDesc iterate_all_payloads_ecs_query_desc
+(
+  "iterate_all_payloads_ecs_query",
+  ecs::make_span(iterate_all_payloads_ecs_query_comps+0, 1)/*rw*/,
+  ecs::empty_span(),
+  ecs::empty_span(),
+  ecs::empty_span());
+template<typename Callable>
+inline void iterate_all_payloads_ecs_query(ecs::EntityManager &manager, Callable function)
+{
+  perform_query(&manager, iterate_all_payloads_ecs_query_desc.getHandle(),
+    [&function](const ecs::QueryView& __restrict components, ecs::EntityManager &mgr)
+    {
+        auto comp = components.begin(), compE = components.end(); G_ASSERT(comp != compE); do if (components.eid_refs[comp] != ecs::INVALID_ENTITY_ID) {
+        {
+          function(
+              ECS_RW_COMP(iterate_all_payloads_ecs_query_comps, "payload_component", Payload)
+            );
+
+        }} while (++comp != compE);
+    }
+  );
+}
+static constexpr ecs::ComponentDesc iterate_all_jettisoned_ecs_query_comps[] =
+{
+//start of 1 rw components at [0]
+  {ECS_HASH("jettisoned_component"), ecs::ComponentTypeInfo<Jettisoned>()}
+};
+static ecs::CompileTimeQueryDesc iterate_all_jettisoned_ecs_query_desc
+(
+  "iterate_all_jettisoned_ecs_query",
+  ecs::make_span(iterate_all_jettisoned_ecs_query_comps+0, 1)/*rw*/,
+  ecs::empty_span(),
+  ecs::empty_span(),
+  ecs::empty_span());
+template<typename Callable>
+inline void iterate_all_jettisoned_ecs_query(ecs::EntityManager &manager, Callable function)
+{
+  perform_query(&manager, iterate_all_jettisoned_ecs_query_desc.getHandle(),
+    [&function](const ecs::QueryView& __restrict components, ecs::EntityManager &mgr)
+    {
+        auto comp = components.begin(), compE = components.end(); G_ASSERT(comp != compE); do if (components.eid_refs[comp] != ecs::INVALID_ENTITY_ID) {
+        {
+          function(
+              ECS_RW_COMP(iterate_all_jettisoned_ecs_query_comps, "jettisoned_component", Jettisoned)
+            );
+
+        }} while (++comp != compE);
+    }
+  );
+}
 static constexpr ecs::ComponentDesc iterate_all_bombs_ecs_query_comps[] =
 {
 //start of 1 rw components at [0]

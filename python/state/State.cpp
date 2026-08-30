@@ -14,6 +14,8 @@ std::vector<unit::Unit *> collect_all_units(ParserState &state);
 std::vector<Rocket *> collect_all_rockets(ParserState &state);
 
 std::vector<Bomb *> collect_all_bombs(ParserState &state);
+std::vector<Payload *> collect_all_payloads(ParserState &state);
+std::vector<Jettisoned *> collect_all_jettisoned(ParserState &state);
 
 void initialize_wrapper(const std::string &VromfsPath, const std::string &grp_path, const std::string &logfile_path,
                         bool fonts = false, bool lang = true, bool mis = true) {
@@ -171,7 +173,10 @@ void PyReplayState::include(py::module_ &m) {
       py::arg("reader"), py::arg("callback") = nullptr)
     .def("collect_all_units", [](ParserState &state) { return collect_all_units(state); })
     .def("collect_all_rockets", [](ParserState &state) { return collect_all_rockets(state); })
-    .def("collect_all_bombs", [](ParserState &state) { return collect_all_bombs(state); });
+    .def("collect_all_bombs", [](ParserState &state) { return collect_all_bombs(state); })
+    .def("collect_all_payloads", [](ParserState &state) { return collect_all_payloads(state); })
+    .def("collect_all_jettisoned",
+         [](ParserState &state) { return collect_all_jettisoned(state); });
 }
 
 PyReplayState py_replay_state{};
