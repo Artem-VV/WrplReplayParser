@@ -594,6 +594,33 @@ mpi::Message *BaseExtReflectable::dispatchMpiMessage(mpi::MessageID mid) {
     case MPI_PACKETS::UnitCamera: {
       return state->_new<mpi::CameraStateMessage>(this);
     }
+    case MPI_PACKETS::UnitHitEffects: {
+      return state->_new<mpi::UnitHitEffectsMessage>(this);
+    }
+    case MPI_PACKETS::UnitHitAnalysis: {
+      return state->_new<mpi::UnitHitAnalysisMessage>(this);
+    }
+    case MPI_PACKETS::UnitOnEffectiveHit:
+    case MPI_PACKETS::UnitOnEffectiveCritHit: {
+      return state->_new<mpi::UnitOnEffectiveHitMessage>(this, mid);
+    }
+    case MPI_PACKETS::UnitOnHit: {
+      return state->_new<mpi::UnitOnHitMessage>(this);
+    }
+    case MPI_PACKETS::UnitOnExplosion: {
+      return state->_new<mpi::UnitOnExplosionMessage>(this);
+    }
+    case MPI_PACKETS::UnitLastEffectiveHit: {
+      return state->_new<mpi::UnitLastEffectiveHitMessage>(this);
+    }
+    case MPI_PACKETS::UnitBulletRearm: {
+      return state->_new<mpi::UnitBulletRearmMessage>(this);
+    }
+    case MPI_PACKETS::UnitSingleShot:
+    case MPI_PACKETS::GmDoStartFire:
+    case MPI_PACKETS::GmDoStopFire: {
+      return state->_new<mpi::UnitShotMessage>(this, mid);
+    }
     default: break;
   }
   return nullptr;
@@ -613,6 +640,52 @@ void BaseExtReflectable::applyMpiMessage(const mpi::Message *m) {
       camera_euler.y = norm_s_ang(camera_euler.y - PI / 2);
       *camera_data.reserveOne() = {camera_euler, gun_pointer};
       camera_data.checkAndPush(state);
+      break;
+    }
+    // Hit packets are stored as they came. Joining them by projectile id is left
+    // to the consumer; only the offender lookup has to happen here, while the
+    // uid still maps to the unit that owns it.
+    case MPI_PACKETS::UnitHitEffects: {
+      auto &rec = state->HitEffects.emplace_back(((const mpi::UnitHitEffectsMessage *) m)->hit);
+      rec.offended_unit = owner_unit;
+      break;
+    }
+    case MPI_PACKETS::UnitHitAnalysis: {
+      auto &rec = state->HitAnalyses.emplace_back(((const mpi::UnitHitAnalysisMessage *) m)->analysis);
+      rec.offended_unit = owner_unit;
+      break;
+    }
+    case MPI_PACKETS::UnitOnEffectiveHit:
+    case MPI_PACKETS::UnitOnEffectiveCritHit: {
+      auto &rec = state->HitDamages.emplace_back(((const mpi::UnitOnEffectiveHitMessage *) m)->damage);
+      rec.offended_unit = owner_unit;
+      break;
+    }
+    case MPI_PACKETS::UnitOnHit: {
+      auto &rec = state->HitDirections.emplace_back(((const mpi::UnitOnHitMessage *) m)->direction);
+      rec.offended_unit = owner_unit;
+      break;
+    }
+    case MPI_PACKETS::UnitOnExplosion: {
+      auto &rec = state->HitExplosions.emplace_back(((const mpi::UnitOnExplosionMessage *) m)->explosion);
+      rec.offended_unit = owner_unit;
+      break;
+    }
+    case MPI_PACKETS::UnitLastEffectiveHit: {
+      auto &rec = state->HitOutcomes.emplace_back(((const mpi::UnitLastEffectiveHitMessage *) m)->outcome);
+      rec.offended_unit = owner_unit;
+      break;
+    }
+    case MPI_PACKETS::UnitBulletRearm: {
+      auto &rec = state->AmmoEvents.emplace_back(((const mpi::UnitBulletRearmMessage *) m)->ammo);
+      rec.unit = owner_unit;
+      break;
+    }
+    case MPI_PACKETS::UnitSingleShot:
+    case MPI_PACKETS::GmDoStartFire:
+    case MPI_PACKETS::GmDoStopFire: {
+      auto &rec = state->ShotEvents.emplace_back(((const mpi::UnitShotMessage *) m)->shot);
+      rec.unit = owner_unit;
       break;
     }
     default: break;

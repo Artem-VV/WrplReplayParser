@@ -142,6 +142,16 @@ public:
   GlobalElo glob_elo{this};
   GeneralState gen_state{this};
   std::pmr::vector<const mpi::IBattleMessage *> BattleMessages{get_allocator()};
+  // Shot and hit packets, one list per message and nothing joined: a record here
+  // is what the packet said. See mpi/GeneralObject.h for what joins to what.
+  std::pmr::vector<mpi::HitEffect> HitEffects{get_allocator()};
+  std::pmr::vector<mpi::HitAnalysis> HitAnalyses{get_allocator()};
+  std::pmr::vector<mpi::HitDamage> HitDamages{get_allocator()};
+  std::pmr::vector<mpi::HitDirection> HitDirections{get_allocator()};
+  std::pmr::vector<mpi::HitExplosion> HitExplosions{get_allocator()};
+  std::pmr::vector<mpi::HitOutcome> HitOutcomes{get_allocator()};
+  std::pmr::vector<mpi::AmmoEvent> AmmoEvents{get_allocator()};
+  std::pmr::vector<mpi::ShotEvent> ShotEvents{get_allocator()};
   // missionArea1 owns the ptrs
   std::pmr::vector<ObjectRewindState<MissionArea *, false, true> *> missionAreas1{get_allocator()};
   std::pmr::vector<ObjectRewindState<MissionArea *, false> *> missionAreas2{get_allocator()};

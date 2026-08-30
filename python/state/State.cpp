@@ -104,6 +104,22 @@ void PyReplayState::include(py::module_ &m) {
     .def_readonly("current_packet_index", &ParserState::current_packet_index)
     .def_readonly("chat_messages", &ParserState::chatMessages)
     .def_readonly("battle_messages", &ParserState::BattleMessages)
+    .def_readonly("hit_effects", &ParserState::HitEffects,
+                  "0xF0E9, one record per hit including harmless ones")
+    .def_readonly("hit_analysis", &ParserState::HitAnalyses,
+                  "0xF15F, hit camera record; sent twice per hit and not for every hit")
+    .def_readonly("hit_damage", &ParserState::HitDamages,
+                  "UnitOnEffectiveHit / UnitOnEffectiveCritHit; join to hit_effects by projectile")
+    .def_readonly("hit_directions", &ParserState::HitDirections,
+                  "0xF144, world travel direction; join by victim and time")
+    .def_readonly("hit_explosions", &ParserState::HitExplosions,
+                  "0xF133, a projectile went off next to the unit; joins by projectile")
+    .def_readonly("hit_outcomes", &ParserState::HitOutcomes,
+                  "0xF0C2, what the hit did: penetration, ricochet, fire, damaged parts")
+    .def_readonly("ammo_events", &ParserState::AmmoEvents,
+                  "0xF0BD, rounds left per barrel; a step down is one round fired")
+    .def_readonly("shots", &ParserState::ShotEvents,
+                  "0xF0B1 single shot, 0xF01B / 0xF01C trigger down and up")
     .def(
       "LoadFromReader",
       [](ParserState &state, IReplayReader &rdr, const std::function<void(ReplayPacket *)> &func) {

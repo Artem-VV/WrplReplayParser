@@ -279,6 +279,7 @@ namespace unit {
     explicit Aircraft(ParserState *state, uint16_t uid) : Unit(state, uid, AircraftType) {
       base_data = &fmv_data;
       base_dvm_data = &fm_dvm_data;
+      fmv_data.owner_unit = this;
     }
 
     ~Aircraft() override = default;
@@ -297,6 +298,7 @@ namespace unit {
     explicit Tank(ParserState *state, uint16_t uid) : Unit(state, uid, TankType) {
       base_data = &gm_data;
       base_dvm_data = &gm_dvm_data;
+      gm_data.owner_unit = this;
     }
 
     ~Tank() override = default;

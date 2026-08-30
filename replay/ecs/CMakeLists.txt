@@ -19,6 +19,8 @@ add_library(dagECS
 
 
 target_link_libraries(dagECS
+        # Unit.cpp builds the hit and shot message types, so it needs MPI after itself
+        MPI::MPI
         FieldSerializer::FieldSerializer
         dagBlk::dagBlk
         FS::FS
