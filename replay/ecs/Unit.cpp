@@ -5,6 +5,9 @@
 #include "FileSystem.h"
 #include "math/dag_mathAng.h"
 #include "res/grpManager.h"
+
+#include <algorithm>
+#include <unordered_map>
 #include "state/ParserState.h"
 
 namespace unit {
@@ -132,6 +135,19 @@ namespace unit {
                                            {0xf, "special gun"},
                                            {0x10, "smoke"}}};
 
+  std::string get_weapon_class(int weapon_id) {
+    // gunnerN wins over the table above 0x10: the two overlap at 0x12, where the game
+    // itself spells both targetingPod and gunner1, and every id above 0x10 seen in a
+    // replay so far has been a gunner mount.
+    if (weapon_id >= 0x11)
+      return fmt::format("gunner{}", weapon_id - 0x11);
+    for (auto &[id, name]: weapon_id_match) {
+      if (id == weapon_id)
+        return name;
+    }
+    return {};
+  }
+
   int get_weapon_id(std::string_view weapon_name) {
     for (auto &[id, name]: weapon_id_match) {
       if (strcmp(weapon_name.data(), name) == 0)
@@ -224,13 +240,35 @@ namespace unit {
     auto blk_val = blk->getStr("blk", nullptr);
     if (!blk_val)
       return {};
-    if (blk->getBool("container", false)) {
-      DataBlock temp_blk;
-      if (dblk::load(temp_blk, blk_val)) {
-        return parse_weapon_container(&temp_blk);
-      }
+    // container:b=true sits inside the file being pointed at, not in the block doing
+    // the pointing, so the flag has to be read after loading it. Checking the outer
+    // block only unwraps a container that is already nested inside another one, and
+    // leaves the first level as the container itself: the Pantsir's TKB-1055 stayed
+    // 170mm_tkb_1055_container, which has no name of its own and no turret.
+    //
+    // Every weapon of every unit comes through here, so the resolved path is cached:
+    // without it the same blk is loaded once per weapon, and twice for a pilon slot,
+    // which is read once for the dedup and again by the Weapon ctor.
+    static std::unordered_map<std::string, std::string> resolved;
+    const auto hit = resolved.find(blk_val);
+    if (hit != resolved.end())
+      return hit->second;
+
+    std::string out = blk_val;
+    // A container pointing at itself would recurse forever, and nothing in the game
+    // files rules that out.
+    for (int depth = 0; depth < 8; ++depth) {
+      DataBlock inner{};
+      if (!dblk::load(inner, out, dblk::ReadFlags(dblk::ReadFlag::ROBUST)) ||
+          !inner.getBool("container", false))
+        break;
+      auto next = inner.getStr("blk", nullptr);
+      if (!next || out == next)
+        break;
+      out = next;
     }
-    return blk_val;
+    resolved.emplace(blk_val, out);
+    return out;
   }
 
   Weapon::Weapon(const DataBlock *blk, Unit *unit, std::vector<uint16_t> &weapons_count) {
@@ -296,6 +334,29 @@ namespace unit {
     has_tree = g_grp_manager.getTree(skel_name, geom_tree);
     if (has_tree) {
       this->turret_tree = std::make_unique<unit::TurretTree>(&geom_tree);
+    }
+    // The damage model is a skeleton of its own, next to the visual one in the same
+    // pack. Its _dm nodes are what the hit packets number, but the two counts agree on
+    // a minority of vehicles - 10 of the 42 measured on one battle - so the list goes
+    // out whole and the caller decides what to count.
+    // The tree is read for its node names and dropped: keeping it would hold the node
+    // matrices of every damaged vehicle for the whole parse, and nothing reads them.
+    GeomNodeTree damage_tree{};
+    if (g_grp_manager.getTree(fmt::format("{}_dm_skeleton", model_name), damage_tree)) {
+      damage_parts.reserve(damage_tree.nodeCount());
+      for (GeomNodeTree::Index16 i(0), ie(damage_tree.nodeCount()); i != ie; ++i) {
+        // The super root of every skeleton has no name. Four names in the whole game
+        // carry a stray high byte - composite_armor_turret_03_dm1û of the cn_vt_4b
+        // among them - which is not valid UTF-8 and would throw on the way into python.
+        // Dropping the byte keeps the name readable; dropping the name would lose a
+        // part the hit packets do number.
+        const char *name = damage_tree.getNodeName(i);
+        std::string out{};
+        for (const char ch: std::string_view(name ? name : ""))
+          if (ch >= 0x20 && ch < 0x7f)
+            out.push_back(ch);
+        damage_parts.emplace_back(std::move(out));
+      }
     }
     // if (this->AsTank())
     //   G_ASSERT(geom_tree.nodeCount() > 0);
@@ -414,6 +475,51 @@ namespace unit {
         }
       }
     }
+    // WeaponPilons is a third place a weapon can hide, next to commonWeapons and the
+    // preset. Only one vehicle in the game uses it, the Pantsir SM-SV: its launcher
+    // is not a weapon of the hull but a slot per missile type, and the three types
+    // are modifications the crew mounts. Without this pass the vehicle has cannons
+    // and a smoke launcher and nothing to fire its missiles from, and every missile
+    // it launches fails to resolve its launcher.
+    if (auto pilons = blk.getBlockByName("WeaponPilons")) {
+      const int WeaponSlotNid = pilons->getNameId("WeaponSlot");
+      const int WeaponPresetNid = pilons->getNameId("WeaponPreset");
+      const int WeaponNid = pilons->getNameId("Weapon"), weaponNid = pilons->getNameId("weapon");
+      for (int i = 0; i < pilons->blockCount(); i++) {
+        auto slot = pilons->getBlock(i);
+        if (slot->getBlockNameId() != WeaponSlotNid)
+          continue;
+        for (int j = 0; j < slot->blockCount(); j++) {
+          auto preset = slot->getBlock(j);
+          if (preset->getBlockNameId() != WeaponPresetNid)
+            continue;
+          for (int k = 0; k < preset->blockCount(); k++) {
+            auto weap = preset->getBlock(k);
+            if (weap->getBlockNameId() != WeaponNid && weap->getBlockNameId() != weaponNid)
+              continue;
+            // One slot per munition, not per launcher: the Pantsir's three slots all
+            // resolve to the same launcher blk and the same emitter, and differ only
+            // in which missile the crew mounted. Keeping all three would put three
+            // identical barrels on the vehicle, so slots are taken once per launcher.
+            const std::string path = parse_weapon_container(weap);
+            bool seen = false;
+            for (auto &w: this->weapons)
+              seen |= w.from_pilon && w.blk_path == path;
+            if (seen)
+              continue;
+            this->weapons.emplace_back(weap, this, weapons_count);
+            // The ctor can bail out and still leave the object in the vector. Marking
+            // such a weapon as a pilon one would make it the fallback of
+            // getWeaponFromRef for every unresolved ref of this vehicle, handing out a
+            // weapon with no blk, no name and no turret.
+            if (this->weapons.back().weapon_id < 0)
+              this->weapons.pop_back();
+            else
+              this->weapons.back().from_pilon = true;
+          }
+        }
+      }
+    }
     std::sort(this->weapons.begin(), this->weapons.end(), [](const Weapon &f, const Weapon &s) {
       if (f.weapon_id == s.weapon_id)
         return f.weapon_index < s.weapon_index;
@@ -522,6 +628,22 @@ namespace unit {
     for (auto &w: this->weapons) {
       if (w.weapon_id == id && w.weapon_index == index) {
         return &w;
+      }
+    }
+    // A pilon slot does not keep the id its blk declares: on the Pantsir SM-SV all
+    // three slots say trigger gunner1, id 18, while the server refers to them as 22
+    // and 23. The id it does use is not derivable from the game files, so the exact
+    // slot cannot be picked. It does not have to be: every slot of that block points
+    // at the same launcher blk, the container of the third redirecting to it, so the
+    // launcher, its emitter and its turret are the same whichever slot fired. What
+    // differs is the munition, and that is named by the battle report, not here.
+    // Only for the ids the server actually uses for such a slot: those are gunner
+    // mounts, 0x11 and up. A miss on a lower id is a miss on a hull weapon and gets
+    // no answer rather than a wrong one.
+    if (id >= 0x11) {
+      for (auto &w: this->weapons) {
+        if (w.from_pilon)
+          return &w;
       }
     }
     return nullptr;

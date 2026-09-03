@@ -227,18 +227,32 @@ bool FMSync(ParserState &state, BitStream &bs) {
           if (zig_val < 0 || zig_val > MAX_WEAPONS_PER_UNIT) { // no negatives
             return false;
           }
-          std::pmr::vector<int32_t> vals{state.get_allocator()};
-          vals.resize(zig_val);
-          for (int i = 0; i < zig_val; i++) { // actually is weapons
-            int temp, temp1;
-            bs.ReadZigZag(temp);
-            bs.ReadZigZag(temp1);
-            if (temp1 > 0)
-              for (int ii = 0; ii < temp1; ii++) {
-                int temp_zig;
-                bs.ReadZigZag(temp_zig);
+          // Rounds left in each weapon of the aircraft, in the order of actual_weapons.
+          // An aircraft sends no trigger events at all, so this counter is the only
+          // record of it firing: a step down is that many rounds gone. Checked on a
+          // battle where 1181 of 1252 impacts by an aircraft have a step within 200 ms,
+          // median 62. It rides every update, so the same value repeats; the drop is
+          // what carries meaning, and finding it is left to the reader, as with the
+          // ground counter this joins.
+          for (int i = 0; i < zig_val; i++) {
+            // ReadZigZag leaves the value untouched when it fails, so a short read
+            // would push whatever was on the stack into the ammo stream. The start is
+            // -1 rather than 0 because RET_FAIL only asserts in a debug build: there a
+            // failed read falls through, and the check below then drops the record
+            // instead of reporting an empty barrel.
+            int rounds_left = -1, extra = 0;
+            RET_FAIL(bs.ReadZigZag(rounds_left));
+            RET_FAIL(bs.ReadZigZag(extra));
+            if (extra > 0)
+              for (int ii = 0; ii < extra; ii++) {
+                // Value goes nowhere, but a failure here desyncs the bit stream and the
+                // reads after it - position, engines - would drift silently.
+                int temp_zig = 0;
+                RET_FAIL(bs.ReadZigZag(temp_zig));
               }
-            vals[i] = temp;
+            if (rounds_left >= 0)
+              state.AmmoEvents.push_back(
+                {state.curr_time_ms, unit, uint8_t(i), 0, uint32_t(rounds_left)});
           }
           uint32_t some_packed_val;
           uint32_t vals_4;
@@ -554,6 +568,10 @@ bool ParseVehicleInfo(ParserState &state, BitStream &bs, TankRef *ref, bool is_f
     }
     RET_FAIL(bs.Read(bool3));
     RET_FAIL(bs.Read(bool4));
+    // Nothing of these carries ammo, which was measured rather than assumed: v1 is zero
+    // in all 1.87 M samples of a battle, and v2 is only ever non-zero on turret 0, where
+    // it is the reload progress the UNPACK above turns into 0..1. A machine gun mount
+    // reports zero for both.
     // if (i==0)
     // LOGI("turret {}: bool1: {}; val1: {}; bool2: {}; val2: {}; bool3: {}; bool4: {}", i, bool1, val1, bool2, val2,
     //      bool3, bool4);

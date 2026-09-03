@@ -3,6 +3,8 @@
 #ifndef WTFILEUTILS_GENERALOBJECT_H
 #define WTFILEUTILS_GENERALOBJECT_H
 #include "mpi.h"
+#include <map>
+#include <string>
 #include "math/dag_Point2.h"
 #include "math/dag_Point3.h"
 #include <vector>
@@ -96,17 +98,14 @@ namespace mpi {
     iSTorpedo = 4,
   };
 
-  enum SomeWeaponFlags : uint8_t {
-    isArtillery = 1 << 0, // if 1, then this is artillery instead of bullet / shell
-    isDepthBomb = 1 << 1, // if this is true, then it's a mine
-    isMine = 1 << 2, // if this is true, then it's a mine
-    someFlag = 1 << 5,
-  };
-  enum DeathType : int32_t {
-    Normal = 0,
-    IsCrash = -1,
-    isLeave = -2,
-  };
+
+  /// Builds the table of death reasons out of the game's own list. Reads lang/ui.csv,
+  /// so it has to run while lang.vromfs is still mounted.
+  void loadDeathReasons();
+
+  /// The game's key for a DeathType value, without the death/ prefix: crewDeath,
+  /// ammoFire, machOverspeed. Empty when the value falls outside the list.
+  std::string_view deathReasonKey(int death_type);
 
   class KillMessage : public IBattleMessage {
     bool readPayload(ParserState *state) override;
@@ -120,7 +119,7 @@ namespace mpi {
     Point3 offended_unit_position{};
     unit::Unit *offender_unit = nullptr; // case 4
     Point3 offender_unit_position{};
-    int DeathType{}; // case 0xb
+    int DeathType{}; // case 0xb. 0 means the field said nothing, see deathReasonKey
     int offender_pid{}; // case 1
     int VictimPid{}; // only filled when a weapon is destroyed
     WeaponType some_enum{};
@@ -259,7 +258,21 @@ namespace mpi {
     unit::Unit *offended_unit = nullptr;
     unit::Unit *offender_unit = nullptr;
     bool crit = false; ///< came as UnitOnEffectiveCritHit rather than UnitOnEffectiveHit
-    uint8_t damage_class = 0; ///< magnitude class; the high nibble scales amount
+    /// A bit mask, not a number. Bit 5 is never set in 669 records of three replays.
+    /// Bits 6 and 7 are magnitude: the median amount is 41 without bit 6 and 1494 with
+    /// it, 126 without bit 7 and 2815 with it, and bit 7 comes on its own once. Bit 4
+    /// does not move the amount. Bits 0 to 3 belong to the shot rather than to this
+    /// record - they are the same across every record of one projectile (101 of 101
+    /// with more than one) yet differ between projectiles of the same round type and
+    /// the same shooter and victim. What they name is not established, and four
+    /// readings are ruled out: not a damaged part id (the part sets of two values
+    /// overlap as often as not), not a count of damaged parts (correlation -0.009),
+    /// not a count of rounds that struck together (the amount per unit does not
+    /// normalise), and not the DamageType of the infantry scripts (its DM_EXPLOSION
+    /// and DM_FIRE would have to line up with the blast and fire flags, and neither
+    /// does). This byte is the third argument of the engine call
+    /// onEffectiveHit(offender_data, amount, uint8, CritDebuffType).
+    uint8_t damage_class = 0;
     float amount = 0.f;
   };
 
@@ -291,21 +304,30 @@ namespace mpi {
     std::vector<int32_t> cumulative_parts{}; ///< CumulativeHit: parts the jet went through
     std::vector<int32_t> ricochet_parts{}; ///< Ricochet: parts the round bounced off
     std::vector<int32_t> fire_parts{}; ///< FireSpawn: parts a fire started on
-    uint32_t part_count = 0; ///< parts in the victim damage model; constant per vehicle
+    /// Parts in the victim damage model. Authoritative and constant per spawn, not per
+    /// model: every changed part index of three battles falls inside it, and two spawns
+    /// of one model differ where their upgrade fit does. The _dm nodes of the grp
+    /// skeleton are the base of the numbering and upgrade parts append past them, so a
+    /// count above the node count is real. Far outliers - 2034, 0, a negative - are the
+    /// blob parse drifting.
+    uint32_t part_count = 0;
     /// Ids of the parts whose state the server serialized with this hit. The state
     /// fields themselves have no established meaning and are not published.
     std::vector<uint16_t> changed_parts{};
     bool complete = false; ///< every list was read without running out of data
   };
 
-  /// 0xF0BD UnitBulletRearm: rounds left in one barrel. A step of one down means a
-  /// round left that barrel, which is the only per round signal automatic weapons
-  /// have: they get no shot event, only a trigger down and up.
+  /// How much is left in one barrel. A step down is that many rounds fired, and that is
+  /// the only record of firing an aircraft leaves at all.
   struct AmmoEvent {
     uint32_t time_ms = 0;
     unit::Unit *unit = nullptr;
-    uint8_t barrel = 0; ///< index into Unit.actual_weapons
-    uint8_t slot = 0; ///< index into Unit.weapons, the belt or shell in use
+    /// Index into Unit::weapons, which pybind exposes as Unit.actual_weapons.
+    uint8_t barrel = 0;
+    /// Index into Unit::storage_weapons, the loadout line being counted: which shell of
+    /// the several a tank took. Ground only - an aircraft sync carries no such index,
+    /// and it needs none, because there the loadout line names its gun outright.
+    uint8_t slot = 0;
     uint32_t rounds_left = 0;
   };
 

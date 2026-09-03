@@ -232,8 +232,16 @@ namespace mpi {
         case 1: return damage.projectile.read(bs);
         case 2: return bs->Read(damage.damage_class);
         case 3: {
-          // The crit message has one more byte between the class and the amount.
-          // The client reads it too but its meaning is not established.
+          // The crit message has one more byte between the class and the amount. It is
+          // the CritDebuffType of the engine: game.vromfs calls this very message as
+          // onEffectiveHit(offender_data, amount, uint8, CritDebuffType) in
+          // game/infantry/es/entity_damage.das, passing CRIT_TYPE_NONE there. That
+          // none is zero and rides the plain 0xF117, which is why this byte is only
+          // ever 1, 2 or 3 here (19, 41 and 27 times on rnd); 2 carries the heavier
+          // amounts, median 2336 against about 713. The names behind 1 to 3 live in
+          // the engine, not in the scripts. The field table of both messages is
+          // otherwise fully read: 0xF117 carries the key, the class byte and the
+          // amount, and nothing else, on all 457 records of rnd.
           if (!is_crit)
             return bs->Read(damage.amount);
           uint8_t unknown = 0;
@@ -248,7 +256,14 @@ namespace mpi {
       this->skipReadingField(idx);
       return true;
     });
-    damage.offender_unit = state->getUnitObj(damage.projectile.offender_uid());
+    // Damage records come without a projectile key when the game does not name the
+    // round: the key is the all ones sentinel and the oid inside it is the victim,
+    // so resolving it would invent an attacker who is the target itself. Records where
+    // offender and offended still come out equal do remain - 8 over four replays - but
+    // those carry valid keys with real generations, so that is the server attributing
+    // damage to the victim itself, not this sentinel leaking through.
+    if (damage.projectile.valid())
+      damage.offender_unit = state->getUnitObj(damage.projectile.offender_uid());
     return valid;
   }
 

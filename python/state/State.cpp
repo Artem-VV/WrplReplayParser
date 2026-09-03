@@ -99,6 +99,10 @@ void PyReplayState::include(py::module_ &m) {
     .def_readonly("glob_elo", &ParserState::glob_elo)
     .def_readonly("zones", &ParserState::Zones)
     .def_readonly("areas", &ParserState::missionAreas2)
+    .def_readonly("sea_level", &ParserState::sea_level,
+                  "Sea level of the map, metres, out of levels/<stem>.blk of aces.vromfs. Altitude is "
+                  "packed relative to it, so a ground vehicle's y sits this far below the frame "
+                  "aircraft and projectiles are in. Zero when the level file does not say.")
     .def_readonly("replay_length_ms", &ParserState::replay_length_ms)
     .def_readonly("curr_time_ms", &ParserState::curr_time_ms)
     .def("rewind_to", &ParserState::rewindToMs,
@@ -119,7 +123,9 @@ void PyReplayState::include(py::module_ &m) {
     .def_readonly("hit_outcomes", &ParserState::HitOutcomes,
                   "0xF0C2, what the hit did: penetration, ricochet, fire, damaged parts")
     .def_readonly("ammo_events", &ParserState::AmmoEvents,
-                  "0xF0BD, rounds left per barrel; a step down is one round fired")
+                  "Rounds left in a barrel: 0xF0BD for a ground vehicle, the aircraft sync for a plane. "
+                  "A step down is that many rounds fired. The aircraft one rides every update, so values "
+                  "repeat; a ground vehicle only sends it on a change.")
     .def_readonly("shots", &ParserState::ShotEvents,
                   "0xF0B1 single shot, 0xF01B / 0xF01C trigger down and up")
     .def(

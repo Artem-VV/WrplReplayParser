@@ -129,6 +129,10 @@ public:
 
   uint32_t replay_length_ms = 0xFFFFFFFF;
   uint32_t curr_time_ms = 0; // the current time in the ECS / state.
+  /// Sea level of the map, metres, out of levels/<stem>.blk. Altitude is packed
+  /// relative to it, so a y of the world is this much above the sea. Zero when the
+  /// level file does not say, which is what most maps do.
+  float sea_level = 0.f;
   net::CNetwork conn{this};
   mpi::GeneralObject main_dispatch{this};
   net_delta_t NetDelta{allocator.getMem()};
@@ -257,6 +261,18 @@ T *ObjectRewindState<T, do_compare, take_ownership, create_default>::reserveOne(
   auto back = &this->time_states.push_back();
   state = back;
   return &back->data;
+}
+
+template<typename T, bool do_compare, bool take_ownership, bool create_default>
+void ObjectRewindState<T, do_compare, take_ownership, create_default>::pushAt(uint32_t time_ms, const T &value) {
+  // Ownership is not handled here: an owning history would need the pointer registered
+  // for release, and this path deliberately skips the rewind bookkeeping.
+  static_assert(!take_ownership, "pushAt cannot be used on an owning history");
+  auto &back = this->time_states.push_back();
+  back.time_ms = time_ms;
+  back.data = value;
+  this->state = &this->time_states.back();
+  this->curr_index = this->time_states.size() - 1;
 }
 
 template<typename T, bool do_compare, bool take_ownership, bool create_default>

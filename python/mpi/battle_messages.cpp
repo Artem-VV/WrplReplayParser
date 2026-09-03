@@ -23,7 +23,23 @@ void PyBattleMessages::include(py::module_ &m) {
       .def_readonly("VictimPid", &mpi::KillMessage::VictimPid)
       .def_readonly("unitType", &mpi::KillMessage::unitType)
       .def_readonly("is_burav_kill", &mpi::KillMessage::maybe_is_burav_kill)
-      .def_readonly("offender_vehicle", &mpi::KillMessage::offender_vehicle);
+      .def_readonly("death_type", &mpi::KillMessage::DeathType)
+      .def_property_readonly(
+        "death_reason",
+        [](const mpi::KillMessage &m) { return std::string(mpi::deathReasonKey(m.DeathType)); },
+        "How the vehicle died, keyed the way the game keys it: crewDeath, ammoFire, machOverspeed. "
+        "death_type is an index into the game's own list of reasons, and this resolves it. Empty when "
+        "the message carries no reason: a death_type of 0 is read as an unfilled field, which makes "
+        "the reason it would otherwise name, death/byShip, unreachable.")
+      .def_property_readonly("weapon_type",
+                             [](const mpi::KillMessage &m) { return uint8_t(m.some_enum); },
+                             "Munition class of the killing weapon: 1 bullet or shell, 2 bomb, 3 rocket, "
+                             "4 torpedo, 0 when the kill names no weapon. Checked against used_weapon on "
+                             "every kill of three replays.")
+      .def_readonly("weapon_flags", &mpi::KillMessage::some_weap_flags,
+                    "Bit flags of the killing weapon: bit 0 artillery, bit 1 depth bomb, bit 2 mine, "
+                    "bit 5 unknown. Only bit 5 (value 32) was seen on the test replays, on gun kills "
+                    "of ground vehicles; bit 0 is the flag an artillery strike would be read by.");
 
   py::class_<mpi::SevereDamageMessage, mpi::IBattleMessage, std::unique_ptr<mpi::SevereDamageMessage, py::nodelete>>(
       mpi, "SevereDamageMessage")

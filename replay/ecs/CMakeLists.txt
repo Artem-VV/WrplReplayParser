@@ -1,5 +1,6 @@
 add_library(dagECS
         STATIC
+        BulletSets.cpp
         ComponentTypes.cpp
         ComponentTypesDefs.cpp
         BitStreamDeserializer.cpp
