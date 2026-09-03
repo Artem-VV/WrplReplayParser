@@ -214,8 +214,8 @@ struct WindowMgr {
         ImGui::SameLine();
         if (ImGui::Button("Open Replay")) {
           std::string_view path_view{path};
-          if (*path_view.begin() == '\"' && *(path_view.end()-1) == '\"')
-            path_view = std::string_view{path+1, path_view.size()-2};
+          if (*path_view.begin() == '\"' && *(path_view.end() - 1) == '\"')
+            path_view = std::string_view{path + 1, path_view.size() - 2};
           fs::path f_path(path_view);
           std::string s_path = f_path.string();
           if (fs::exists(f_path)) {

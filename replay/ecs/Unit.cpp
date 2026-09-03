@@ -27,8 +27,8 @@ namespace unit {
     const char *name;
   };
 
-  void blkPrint(DataBlock &blk) {
-    blk.printBlock(std::cout);
+  void blkPrint(const DataBlock *blk) {
+    blk->printBlock(std::cout);
     std::cout.flush();
   }
 
@@ -274,8 +274,8 @@ namespace unit {
   Weapon::Weapon(const DataBlock *blk, Unit *unit, std::vector<uint16_t> &weapons_count) {
     auto trigger = blk->getStr("trigger", nullptr);
     auto blk_str = blk->getStr("blk", nullptr);
-    auto emitter = blk->getStr("emitter", nullptr);
-    if (!trigger || !blk_str || !emitter) {
+    auto _emitter = blk->getStr("emitter", nullptr);
+    if (!trigger || !blk_str || !_emitter) {
       LOGE("error while making final weapon vector for unit {}", unit->unit_name);
       return;
     }
@@ -286,7 +286,7 @@ namespace unit {
       return;
     }
     this->weapon_index = weapons_count[weapon_id];
-    this->emitter = emitter;
+    this->emitter = _emitter;
     this->blk_path = parse_weapon_container(blk);
     fs::path blk_fs_path = this->blk_path;
     this->weapon_name = blk_fs_path.filename().string();
@@ -295,7 +295,7 @@ namespace unit {
     }
     this->name_index = translate::get_locale_index(fmt::format("weapons/{}", this->weapon_name));
     this->name_index_short = translate::get_locale_index(fmt::format("weapons/{}/short", this->weapon_name));
-    if (this->weapon_name != "dummy_weapon")
+    if (this->weapon_name != "dummy_weapon" && strcmp("boosters", trigger) != 0)
       DG_ASSERT(this->name_index != translate::INVALID_TRANSLATE_INDEX);
 
     weapons_count[weapon_id]++;
