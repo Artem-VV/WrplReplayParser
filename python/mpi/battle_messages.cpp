@@ -148,7 +148,10 @@ void PyBattleMessages::include(py::module_ &m) {
       .def_readonly("time_ms", &mpi::AmmoEvent::time_ms)
       .def_readonly("unit", &mpi::AmmoEvent::unit)
       .def_readonly("barrel", &mpi::AmmoEvent::barrel)
-      .def_readonly("slot", &mpi::AmmoEvent::slot)
+      .def_readonly("slot", &mpi::AmmoEvent::slot,
+                    "Which load of this gun the count is for: an index over the Unit.weapons lines whose "
+                    "bullet names a set of this gun, not over the whole loadout. Always 0 on aircraft, "
+                    "where WeaponData.launcher names the gun instead.")
       .def_readonly("rounds_left", &mpi::AmmoEvent::rounds_left);
 
   bind_readonly_vector_no_contain<std::pmr::vector<mpi::AmmoEvent>>(m, "AmmoEventList");

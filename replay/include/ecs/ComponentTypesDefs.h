@@ -132,6 +132,10 @@ struct Rocket {
   uint32_t uleb_1;
   ecs::EntityId ownerEid;
   ecs::EntityId eid2;
+  /// Own entity id, stamped on appear. Hit packets name a projectile by (offender uid,
+  /// entity index, generation), so this joins them to the store. eid2 is not it: that
+  /// one comes over the wire and is always 0:0.
+  ecs::EntityId eid;
   uint8_t u1_1;
   uint32_t u4_1;
   uint32_t weapon_ref;

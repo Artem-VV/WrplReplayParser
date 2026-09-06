@@ -69,8 +69,8 @@ void PyUnit::include(py::module_ &m) {
 
   py::class_<unit::weapon_data>(unit, "WeaponData")
     .def_readonly("launcher", &unit::weapon_data::launcher,
-                  "Gun this line is for, by Weapon.weapon_name. Empty on ground vehicles, where the loadout "
-                  "line is picked by AmmoEvent.slot instead.")
+                  "Gun this line is for, by Weapon.weapon_name. Empty on ground vehicles, where the line is "
+                  "picked by AmmoEvent.slot among the lines of that gun instead.")
     .def_readonly("bullet", &unit::weapon_data::bullet,
                   "BulletSet.name of the shell or belt taken: a block of the gun blk, not the round itself.")
     .def_readonly("count", &unit::weapon_data::count);
@@ -239,6 +239,10 @@ void PyUnit::include(py::module_ &m) {
                   "Entity id of the shooter. Resolving it through the entity manager fails once the\n"
                   "entity is gone from the world, so prefer owned_by.")
     .def_readonly("eid2", &Rocket::eid2, "Always 0:0 on every replay checked so far. Do not rely on it.")
+    .def_readonly("eid", &Rocket::eid,
+                  "Own entity id. Hit packets name a projectile by (offender uid, entity "
+                  "index, generation), so eid.index() and eid.get_generation() join them "
+                  "to this store.")
     .def_readonly("weapon_obj", &Rocket::weapon_obj,
                   "The launcher this projectile came from, or None. Empty for aircraft twin mounts,\n"
                   "where weapon_name is still correct.")

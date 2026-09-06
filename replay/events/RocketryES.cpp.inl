@@ -4,10 +4,11 @@
 #include "ecs/query/coreEvents.h"
 #include "ecs/ecsCodegen.h"
 
-static void on_rocket_appear_es(const ecs::EventEntityCreated &evt, Rocket &rocket_component,
-                                ecs::EntityManager &manager) {
+static void on_rocket_appear_es(const ecs::EventEntityCreated &evt, const ecs::EntityId eid,
+                                Rocket &rocket_component, ecs::EntityManager &manager) {
   rocket_component.type = StoreType::Rocket;
   rocket_component.created_at_ms = *manager.curr_time_ms;
+  rocket_component.eid = eid;
 }
 
 static void on_rocket_disappear_es(const ecs::EventEntityDestroyedBasic &evt, Rocket &rocket_component,
@@ -16,9 +17,11 @@ static void on_rocket_disappear_es(const ecs::EventEntityDestroyedBasic &evt, Ro
     rocket_component.destroyed_at_ms = *manager.curr_time_ms;
 }
 
-static void on_bomb_appear_es(const ecs::EventEntityCreated &evt, Bomb &bomb_component, ecs::EntityManager &manager) {
+static void on_bomb_appear_es(const ecs::EventEntityCreated &evt, const ecs::EntityId eid, Bomb &bomb_component,
+                              ecs::EntityManager &manager) {
   bomb_component.type = StoreType::Bomb;
   bomb_component.created_at_ms = *manager.curr_time_ms;
+  bomb_component.eid = eid;
 }
 
 static void on_bomb_disappear_es(const ecs::EventEntityDestroyedBasic &evt, Bomb &bomb_component,
@@ -27,10 +30,11 @@ static void on_bomb_disappear_es(const ecs::EventEntityDestroyedBasic &evt, Bomb
     bomb_component.destroyed_at_ms = *manager.curr_time_ms;
 }
 
-static void on_torpedo_appear_es(const ecs::EventEntityCreated &evt, Torpedo &torpedo_component,
-                                 ecs::EntityManager &manager) {
+static void on_torpedo_appear_es(const ecs::EventEntityCreated &evt, const ecs::EntityId eid,
+                                 Torpedo &torpedo_component, ecs::EntityManager &manager) {
   torpedo_component.type = StoreType::Torpedo;
   torpedo_component.created_at_ms = *manager.curr_time_ms;
+  torpedo_component.eid = eid;
 }
 
 static void on_torpedo_disappear_es(const ecs::EventEntityDestroyedBasic &evt, Torpedo &torpedo_component,
@@ -39,10 +43,11 @@ static void on_torpedo_disappear_es(const ecs::EventEntityDestroyedBasic &evt, T
     torpedo_component.destroyed_at_ms = *manager.curr_time_ms;
 }
 
-static void on_payload_appear_es(const ecs::EventEntityCreated &evt, Payload &payload_component,
-                                 ecs::EntityManager &manager) {
+static void on_payload_appear_es(const ecs::EventEntityCreated &evt, const ecs::EntityId eid,
+                                 Payload &payload_component, ecs::EntityManager &manager) {
   payload_component.type = StoreType::Payload;
   payload_component.created_at_ms = *manager.curr_time_ms;
+  payload_component.eid = eid;
 }
 
 static void on_payload_disappear_es(const ecs::EventEntityDestroyedBasic &evt, Payload &payload_component,
@@ -51,10 +56,11 @@ static void on_payload_disappear_es(const ecs::EventEntityDestroyedBasic &evt, P
     payload_component.destroyed_at_ms = *manager.curr_time_ms;
 }
 
-static void on_jettisoned_appear_es(const ecs::EventEntityCreated &evt, Jettisoned &jettisoned_component,
-                                    ecs::EntityManager &manager) {
+static void on_jettisoned_appear_es(const ecs::EventEntityCreated &evt, const ecs::EntityId eid,
+                                    Jettisoned &jettisoned_component, ecs::EntityManager &manager) {
   jettisoned_component.type = StoreType::Jettisoned;
   jettisoned_component.created_at_ms = *manager.curr_time_ms;
+  jettisoned_component.eid = eid;
 }
 
 static void on_jettisoned_disappear_es(const ecs::EventEntityDestroyedBasic &evt, Jettisoned &jettisoned_component,
@@ -82,6 +88,19 @@ std::vector<Rocket *> collect_all_rockets(ParserState &state) {
     rockets.push_back(&rocket_component);
   });
   return rockets;
+}
+
+template<typename Callable>
+static void iterate_all_torpedoes_ecs_query(ecs::EntityManager &manager, Callable c);
+
+// No arc for a torpedo: the ballistic model integrates a body in air, and this one runs
+// in water.
+std::vector<Torpedo *> collect_all_torpedoes(ParserState &state) {
+  std::vector<Torpedo *> torpedoes;
+  iterate_all_torpedoes_ecs_query(state.g_entity_mgr, [&torpedoes](Torpedo &torpedo_component) {
+    torpedoes.push_back(&torpedo_component);
+  });
+  return torpedoes;
 }
 
 template<typename Callable>
