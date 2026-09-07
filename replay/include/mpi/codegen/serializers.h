@@ -19,8 +19,6 @@ namespace danet {
 
   int stringCoder(DANET_ENCODER_SIGNATURE);
 
-  int UidCoder(DANET_ENCODER_SIGNATURE);
-
   int DataBlockCoder(DANET_ENCODER_SIGNATURE);
 
   int CountryCoder(DANET_ENCODER_SIGNATURE);
@@ -67,11 +65,6 @@ namespace danet {
 
   int KillerStructCoder(DANET_ENCODER_SIGNATURE);
 
-
-  template <>
-  struct DefaultEncoderChooser<danet::Uid> {
-    static constexpr reflection_var_encoder coder = UidCoder;
-  };
 
   template <>
   struct DefaultEncoderChooser<std::string> {

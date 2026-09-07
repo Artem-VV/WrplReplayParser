@@ -22,6 +22,8 @@ public:
     new (obj) T(std::forward<Args>(args)...);
   }
 
+  bool init_state() { return initialized; }
+
   ~OnDemandInit() {
     ZoneScoped;
     if (initialized)

@@ -8,7 +8,7 @@ public:
 public:
   DECL_REFLECTION(MPlayer, danet::ReflectableObject)
   void drawObject() const override;
-  danet::ReflectionVar<danet::Uid> uid{"uid", &invitedNickName, 2};
+  danet::ReflectionVar<danet::Uid> uid{"uid", &invitedNickName, 2, danet::UidCoder};
   danet::ReflectionVar<std::string> invitedNickName{"invitedNickName", &nickLocKey, 3};
   danet::ReflectionVar<std::string> nickLocKey{"nickLocKey", &ClanTag, 4, danet::TranslatedCoder};
   danet::ReflectionVar<std::string> ClanTag{"ClanTag", &Title, 5};

@@ -74,4 +74,17 @@ namespace danet {
     }
     return false;
   }
+
+  int UidCoder(DANET_ENCODER_SIGNATURE) {
+    ZoneScoped;
+    auto data = meta->getValue<danet::Uid>();
+    if (op == DANET_REFLECTION_OP_ENCODE) {
+      bs->WriteBits(reinterpret_cast<uint8_t *>(data), BYTES_TO_BITS(UID_SIZE));
+      return true;
+    } else if (op == DANET_REFLECTION_OP_DECODE) {
+      REPL_VER(bs->ReadBits(reinterpret_cast<uint8_t *>(data), BYTES_TO_BITS(UID_SIZE)));
+      return true;
+    }
+    return false;
+  }
 } // namespace danet

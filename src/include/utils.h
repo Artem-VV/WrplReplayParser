@@ -14,8 +14,7 @@
 #include <cstdint>
 #include <sstream>
 #include <span>
-#include <cpptrace/cpptrace.hpp>
-
+#include "cpptrace_compat.h"
 extern bool DO_VERBOSE;
 
 #define MAKE4C(a, b, c, d) ((a) | ((b) << 8) | ((c) << 16) | ((d) << 24))
