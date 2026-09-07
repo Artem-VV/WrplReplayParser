@@ -92,6 +92,8 @@ namespace mpi {
     const netutils::FloatSerializeProps ANGLE_PROPS{true, true, 6.2831855f};
     const netutils::FloatSerializeProps FIRE_RADIUS_PROPS{false, true, 1.f};
     const netutils::FloatSerializeProps EXPLOSION_RADIUS_PROPS{false, true, 50.f};
+    // Closes a KineticHit and a Ricochet record.
+    const netutils::FloatSerializeProps HIT_RATIO_PROPS{false, false, 1.f};
 
     bool skip_float(const BitStream &bs, const netutils::FloatSerializeProps &props) {
       float v = 0.f;
@@ -308,8 +310,9 @@ namespace mpi {
       int part = 0;
       ok = ok && body.Read(n8);
       for (uint8_t i = 0; ok && i < n8; ++i) { // KineticHit
+        // The record carries no direction; it closes with a float instead.
         ok = body.ReadZigZag(part) && skip_bit(body) && skip_float(body, ANGLE_PROPS) &&
-             skip_float(body, ANGLE_PROPS) && skip_dir(body) && skip_bit(body);
+             skip_float(body, ANGLE_PROPS) && skip_float(body, HIT_RATIO_PROPS);
         if (ok)
           outcome.kinetic_parts.push_back(part);
       }
@@ -321,9 +324,10 @@ namespace mpi {
       }
       ok = ok && body.Read(n8);
       for (uint8_t i = 0; ok && i < n8; ++i) { // Ricochet
-        ok = body.ReadZigZag(part) && skip_bit(body) && skip_dir(body) &&
+        // No leading flag, and the same closing float as a KineticHit.
+        ok = body.ReadZigZag(part) && skip_dir(body) && skip_float(body, ANGLE_PROPS) &&
              skip_float(body, ANGLE_PROPS) && skip_float(body, ANGLE_PROPS) &&
-             skip_float(body, ANGLE_PROPS);
+             skip_float(body, HIT_RATIO_PROPS);
         if (ok)
           outcome.ricochet_parts.push_back(part);
       }
