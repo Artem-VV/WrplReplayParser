@@ -64,13 +64,12 @@
 #endif
 
 #if (defined(__clang__) || __GNUC__ >= 7)
-#define ASSUME_ALIGNED(ptr, sz) (__builtin_assume_aligned((const void *)ptr, sz))
+#define ASSUME_ALIGNED(ptr, sz) (__builtin_assume_aligned((const void *) ptr, sz))
 #elif defined(_MSC_VER)
-#define ASSUME_ALIGNED(ptr, sz) (__assume((((const char *)ptr) - ((const char *)0)) % (sz) == 0), (ptr))
+#define ASSUME_ALIGNED(ptr, sz) (__assume((((const char *) ptr) - ((const char *) 0)) % (sz) == 0), (ptr))
 #else
 #define ASSUME_ALIGNED(ptr, sz) (ptr)
 #endif
-
 
 
 /// @addtogroup math
@@ -97,14 +96,12 @@ class TMatrix4;
 
 struct Frustum;
 
-template <typename T>
-inline constexpr T min(const T val1, const T val2)
-{
+template<typename T>
+inline constexpr T min(const T val1, const T val2) {
   return (val1 < val2 ? val1 : val2);
 }
-template <typename T>
-inline constexpr T max(const T val1, const T val2)
-{
+template<typename T>
+inline constexpr T max(const T val1, const T val2) {
   return (val1 > val2 ? val1 : val2);
 }
 
@@ -128,28 +125,28 @@ typedef float real;
 #define REAL_EPS FLT_EPSILON
 
 /// PI
-#define PI     ((real)3.1415926535)
+#define PI     ((real) 3.1415926535)
 /// 2*PI
-#define TWOPI  ((real)6.283185307)
+#define TWOPI  ((real) 6.283185307)
 /// PI/2
-#define HALFPI ((real)1.570796326794895)
+#define HALFPI ((real) 1.570796326794895)
 
 /// ~sqrt(FLT_MIN)
-#define VERY_SMALL_NUMBER ((real)4e-19)
+#define VERY_SMALL_NUMBER ((real) 4e-19)
 
 /// It is suggested to use in game mechanics to represent "unattainable" or very large values.
 /// This value can be accurately represented by the double, float and int32 types,
 /// and also converted to a string with the '%g' format (without the need to specify accuracy)
 /// without loss of accuracy.
-#define VERY_BIG_NUMBER ((real)2147440000)
+#define VERY_BIG_NUMBER ((real) 2147440000)
 
 /// useful math functions (routed via macroses)
-#define DEG_TO_RAD    (PI / (real)180.0)
-#define RAD_TO_DEG    ((real)180.0 / PI)
+#define DEG_TO_RAD    (PI / (real) 180.0)
+#define RAD_TO_DEG    ((real) 180.0 / PI)
 /// converts degrees to radians
-#define DegToRad(deg) ((real)(deg)*DEG_TO_RAD)
+#define DegToRad(deg) ((real) (deg) * DEG_TO_RAD)
 /// converts radians to degrees
-#define RadToDeg(rad) ((real)(rad)*RAD_TO_DEG)
+#define RadToDeg(rad) ((real) (rad) * RAD_TO_DEG)
 
 #define INLINE inline
 
@@ -159,16 +156,14 @@ INLINE float rabs(float a) { return fabsf(a); }
 INLINE float fsel(float a, float b, float c) { return (a >= 0.0f) ? b : c; }
 INLINE double fsel(double a, double b, double c) { return (a >= 0.0) ? b : c; }
 
-template <class T>
-constexpr T sqr(T x)
-{
+template<class T>
+constexpr T sqr(T x) {
   return x * x;
 }
 
 
 /// normalize angle to the range [0;2*PI)
-INLINE real norm_ang(real a)
-{
+INLINE real norm_ang(real a) {
   if (a >= 0.f && a < TWOPI)
     return a;
   else
@@ -176,15 +171,13 @@ INLINE real norm_ang(real a)
 }
 
 /// normalize angle to the range [-PI;PI]
-INLINE float norm_s_ang(float a)
-{
+INLINE float norm_s_ang(float a) {
   a = fmodf(a, 2 * PI);
   return a > PI ? a - 2 * PI : (a < -PI ? a + 2 * PI : a);
 }
 
 // https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
-INLINE bool is_relative_equal_float(float a, float b, float max_diff = 1e-5f, float max_rel_diff = FLT_EPSILON)
-{
+INLINE bool is_relative_equal_float(float a, float b, float max_diff = 1e-5f, float max_rel_diff = FLT_EPSILON) {
   const float diff = fabsf(a - b);
   if (diff <= max_diff)
     return true;
@@ -193,10 +186,13 @@ INLINE bool is_relative_equal_float(float a, float b, float max_diff = 1e-5f, fl
   return diff <= (a < b ? b : a) * max_rel_diff;
 }
 
-INLINE bool is_equal_float(float a, float b, float eps = 1e-5f) { return is_relative_equal_float(a, b, eps, FLT_EPSILON); }
+INLINE bool is_equal_float(float a, float b, float eps = 1e-5f) {
+  return is_relative_equal_float(a, b, eps, FLT_EPSILON);
+}
 
 
-INLINE bool are_approximately_equal(float a, float b, float epsilon = 8 * FLT_EPSILON) // Three bits precision by default.
+INLINE bool are_approximately_equal(float a, float b,
+                                    float epsilon = 8 * FLT_EPSILON) // Three bits precision by default.
 {
   return is_relative_equal_float(a, b, epsilon, epsilon);
 }
@@ -216,7 +212,7 @@ INLINE bool are_approximately_equal(float a, float b, float epsilon = 8 * FLT_EP
 
 #if !_TARGET_PC_LINUX
 #ifndef __signbitf
-//INLINE int __signbitf(float x) { return FP_SIGN_BIT(x); }
+// INLINE int __signbitf(float x) { return FP_SIGN_BIT(x); }
 #endif
 INLINE int signbitf(float x) { return FP_SIGN_BIT(x); }
 #endif
@@ -231,16 +227,14 @@ INLINE double flt_epsion_threshold(double v) { return fabs(v) < FLT_EPSILON ? 0.
 // @{
 
 /// returns exp(-p) (approximate)
-INLINE float fastexp(float p)
-{
+INLINE float fastexp(float p) {
   const float e = -1.44269504f * float(0x00800000) * p;
   const int _i = int(e) + 0x3F800000;
   return std::bit_cast<float>(_i);
 }
 
 /// converts p (range 0..1) to integer (range 0..255), clamps if out of range
-INLINE unsigned real2uchar(float p)
-{
+INLINE unsigned real2uchar(float p) {
   const float _n = p + 1.0f;
   unsigned i = FP_BITS(_n);
   if (i >= 0x40000000)
@@ -252,15 +246,13 @@ INLINE unsigned real2uchar(float p)
   return i;
 }
 
-template <typename T>
-struct DisablePointersInMath
-{};
-template <typename T>
+template<typename T>
+struct DisablePointersInMath {};
+template<typename T>
 struct DisablePointersInMath<T *>;
 
-template <typename T>
-[[nodiscard]] INLINE T clamp(T t, const T min_val, const T max_val)
-{
+template<typename T>
+[[nodiscard]] INLINE T clamp(T t, const T min_val, const T max_val) {
   DisablePointersInMath<T>();
   if (t < min_val)
     t = min_val;
@@ -269,9 +261,8 @@ template <typename T>
   return max_val;
 }
 
-template <typename T>
-inline void clamp_inplace(T &t, const T min_val, const T max_val)
-{
+template<typename T>
+inline void clamp_inplace(T &t, const T min_val, const T max_val) {
   DisablePointersInMath<T>();
   if (t < min_val)
     t = min_val;
@@ -280,54 +271,48 @@ inline void clamp_inplace(T &t, const T min_val, const T max_val)
   t = max_val;
 }
 
-template <typename T1, typename T2>
-[[nodiscard]] inline T1 clamp_max(const T1 value, const T2 p_max)
-{
+template<typename T1, typename T2>
+[[nodiscard]] inline T1 clamp_max(const T1 value, const T2 p_max) {
   DisablePointersInMath<T1>();
-  if (value > (T1)p_max)
-    return (T1)p_max;
+  if (value > (T1) p_max)
+    return (T1) p_max;
   return value;
 }
 
-template <typename T1, typename T2>
-[[nodiscard]] inline T1 clamp_min(const T1 value, const T2 p_min)
-{
+template<typename T1, typename T2>
+[[nodiscard]] inline T1 clamp_min(const T1 value, const T2 p_min) {
   DisablePointersInMath<T1>();
-  if (value < (T1)p_min)
-    return (T1)p_min;
+  if (value < (T1) p_min)
+    return (T1) p_min;
   return value;
 }
 
-template <typename T1, typename T2>
-inline void clamp_max_inplace(T1 &value, const T2 p_max)
-{
+template<typename T1, typename T2>
+inline void clamp_max_inplace(T1 &value, const T2 p_max) {
   DisablePointersInMath<T1>();
-  if (value > (T1)p_max)
-    value = (T1)p_max;
+  if (value > (T1) p_max)
+    value = (T1) p_max;
 }
 
-template <typename T1, typename T2>
-inline void clamp_min_inplace(T1 &value, const T2 p_min)
-{
+template<typename T1, typename T2>
+inline void clamp_min_inplace(T1 &value, const T2 p_min) {
   DisablePointersInMath<T1>();
-  if (value < (T1)p_min)
-    value = (T1)p_min;
+  if (value < (T1) p_min)
+    value = (T1) p_min;
 }
 
 // fast versions, |Relative Error| <= 1.5 * 2^(-12)
 #if _TARGET_SIMD_SSE
 INLINE float fastinvsqrt(float x) { return _mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(x))); }
 INLINE float fastinv(float x) { return _mm_cvtss_f32(_mm_rcp_ss(_mm_set_ss(x))); }
-INLINE float fastsqrt(float x)
-{
+INLINE float fastsqrt(float x) {
   __m128 vx = _mm_set_ss(x);
   return _mm_cvtss_f32(_mm_mul_ss(vx, _mm_rsqrt_ss(vx)));
 }
 #elif _TARGET_SIMD_NEON
 INLINE float fastinvsqrt(float x) { return vget_lane_f32(vrsqrte_f32(vset_lane_f32(x, vdup_n_f32(0.f), 0)), 0); }
 INLINE float fastinv(float x) { return vget_lane_f32(vrecpe_f32(vset_lane_f32(x, vdup_n_f32(0.f), 0)), 0); }
-INLINE float fastsqrt(float x)
-{
+INLINE float fastsqrt(float x) {
   float32x2_t vx = vset_lane_f32(x, vdup_n_f32(0.f), 0);
   return vget_lane_f32(vmul_f32(vx, vrsqrte_f32(vx)), 0);
 }
@@ -343,8 +328,12 @@ INLINE float fastsqrt(float x) { return sqrtf(x); }
 #pragma warning(push)
 #pragma warning(disable : 4723) // potential division by zero
 #endif
-INLINE float safediv(float a, float b) { return b > VERY_SMALL_NUMBER ? a / b : (b < -VERY_SMALL_NUMBER ? a / b : 0.f); }
-INLINE double safediv(double a, double b) { return b > VERY_SMALL_NUMBER ? a / b : (b < -VERY_SMALL_NUMBER ? a / b : 0.0); }
+INLINE float safediv(float a, float b) {
+  return b > VERY_SMALL_NUMBER ? a / b : (b < -VERY_SMALL_NUMBER ? a / b : 0.f);
+}
+INLINE double safediv(double a, double b) {
+  return b > VERY_SMALL_NUMBER ? a / b : (b < -VERY_SMALL_NUMBER ? a / b : 0.0);
+}
 
 INLINE float safeinvsqrtfast(float x) { return x > 0.f ? fastinvsqrt(x) : 1.f; }
 INLINE double safeinvsqrtfast(double x) { return x > 0.0 ? fastinvsqrt(x) : 1.0; }
@@ -376,8 +365,7 @@ INLINE double safe_sqrt(double x) { return x > 0.0 ? ::sqrt(x) : 0.0; }
 
 /// converts float to nearest integer,
 /// faster than C conversion that truncates float
-INLINE int float2int_near(float x)
-{
+INLINE int float2int_near(float x) {
 #if !_TARGET_PC_WIN
   return int(floorf(x + 0.5f));
 #else
@@ -391,8 +379,7 @@ INLINE int float2int_near(float x)
 INLINE float safeinv(float x) { return safediv(1.0f, x); }
 INLINE double safeinv(double x) { return safediv(1.0, x); }
 
-INLINE int real2int(float f)
-{
+INLINE int real2int(float f) {
   return float2int_near(f); ///< fixme:probably int(f) is even faster on modern compilers
 }
 
@@ -412,11 +399,10 @@ void sincos(float rad, float &s, float &c);
 
 // @}
 
-template <typename T>
-INLINE T lerp(const T a, const T b, float t)
-{
+template<typename T>
+INLINE T lerp(const T a, const T b, float t) {
   DisablePointersInMath<T>();
-  return (T)(a * (1.0f - t) + b * t);
+  return (T) (a * (1.0f - t) + b * t);
 }
 
 // timestep independent approach function
@@ -435,9 +421,8 @@ INLINE T lerp(const T a, const T b, float t)
 // Time to get to average between 'from' and 'to' equals to (viscosity*(1/ln(2)) or approximately vis*1.443
 // on time = viscosity value equals to 0.37 distance between source and destination
 
-template <typename T>
-INLINE T approach(T from, T to, float dt, float viscosity)
-{
+template<typename T>
+INLINE T approach(T from, T to, float dt, float viscosity) {
   DisablePointersInMath<T>();
   if (viscosity < 1e-9f)
     return to;
@@ -447,9 +432,8 @@ INLINE T approach(T from, T to, float dt, float viscosity)
 
 // use approach_vel() for faster convergence of noisy
 // values that needed high viscosity for smoothing
-template <typename T>
-INLINE T approach_vel(T from, T to, float dt, float viscosity, T &vel, float vel_viscosity, float vel_factor)
-{
+template<typename T>
+INLINE T approach_vel(T from, T to, float dt, float viscosity, T &vel, float vel_viscosity, float vel_factor) {
   T newVal = approach(from, to, dt, viscosity);
 
   if (dt >= 1e-9f)
@@ -462,15 +446,13 @@ void init_math();
 
 extern const float DECLSPEC_ALIGN(16) math_float_zero[16] ATTRIBUTE_ALIGN(16);
 
-template <typename T>
-INLINE const T &ZERO()
-{
+template<typename T>
+INLINE const T &ZERO() {
   static_assert(sizeof(T) <= sizeof(math_float_zero), "T is too big");
   return *reinterpret_cast<const T *>(math_float_zero);
 }
-template <typename T>
-INLINE const T *ZERO_PTR()
-{
+template<typename T>
+INLINE const T *ZERO_PTR() {
   return &ZERO<T>();
 }
 

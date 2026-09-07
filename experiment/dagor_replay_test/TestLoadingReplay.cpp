@@ -9,8 +9,8 @@
 #include "Replay/Replay.h"
 #include "mpi/ObjectDispatcher.h"
 #include "Logger.h"
-#include "mimalloc-stats.h"
-#include "mimalloc/types.h"
+// #include "mimalloc-stats.h"
+// #include "mimalloc/types.h"
 
 #include "state/ParserState.h"
 #include <cctype>
@@ -36,7 +36,7 @@ std::string convert_os_path_to_wsl2(const char *str) {
   return convert_os_path_to_wsl2(t);
 }
 
-
+/*
 // Accumulator for one heap
 typedef struct heap_usage_s {
   size_t reserved_bytes; // total block bytes owned by this heap
@@ -45,10 +45,10 @@ typedef struct heap_usage_s {
   size_t blocks;
 } heap_usage_t;
 
-/*
+
   dev3 callback shape may vary slightly by commit.
-  Adjust argument names/types to match your mimalloc/types.h header.
-*/
+  Adjus argument names/types to match your mimalloc/types.h header.
+
 static bool visit_block(const mi_heap_t *heap, const mi_heap_area_t *area, void *block, size_t block_size, void *arg) {
   (void) heap;
   (void) area;
@@ -89,20 +89,20 @@ heap_usage_t get_heap_usage(mi_heap_t *h) {
   mi_heap_visit_blocks(h, true, visit_block, &u);
 
   return u;
-}
+}*/
 
 int main() {
   // std::signal(SIGSEGV, signal_handler);
   fs::path conf_dir = CONFIG_DIR;
   fs::path config_file = conf_dir / "dagor_replay_test.blk";
   DataBlock conf_blk{};
+  g_log_handler.initialize();
   G_ASSERT(dblk::load(conf_blk, config_file.string().c_str()));
   bool is_server_replay = conf_blk.getBool("is_server_replay", false);
   bool source_is_linux_path = conf_blk.getBool("source_is_linux_path", false);
   auto replay_path = conf_blk.getStr("source", nullptr);
   bool bin_is_linux_path = conf_blk.getBool("bin_is_linux_path", false);
   auto bin_path = conf_blk.getStr("bin_path", nullptr);
-  g_log_handler.initialize();
   g_log_handler->loadSinkFromDataBlock(*conf_blk.getBlockByNameEx("logging"));
   std::string rpl_path_str = replay_path;
   std::string bin_path_str = bin_path;
@@ -150,9 +150,10 @@ int main() {
     }
     iterate_all_units(state);
     idx = state.current_packet_index;
+    /*
     auto heap_ptr = state.get_allocator()->get_heap_ptr();
     std::cout << mi_stats_as_json(&heap_ptr->stats, 0, NULL) << std::endl;
-    heap_usage_t u = get_heap_usage(heap_ptr);
+    heap_usage_t u = get_heap_usage(heap_ptr);*/
     state.rewindToMs(105620);
     state.rewindToMs(157507);
     state.rewindToMs(156777);

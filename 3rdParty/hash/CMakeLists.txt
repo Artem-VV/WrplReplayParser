@@ -20,5 +20,6 @@ target_include_directories(XXH3
 
 
 add_library(XXH3::XXH3 ALIAS XXH3)
-
-target_compile_options(XXH3 PRIVATE -msse4.2)
+if (NOT EMSCRIPTEN)
+    target_compile_options(XXH3 PRIVATE -msse4.2)
+endif ()
