@@ -23,11 +23,6 @@ void include_types_2(py::module &gen) {
   bind_readonly_vector<dag::Vector<danet::ReflectionVar<uint64_t>::TimeState>>(gen, "uint64_t_ts_vector");
 
   bind_reflection_var<uint64_t>(gen, "uint64_t_var");
-  //danet::ReflectionVar<danet::Uid> bindings
-  bind_time_state<danet::Uid>(gen, "danet_Uid_ts");
-  bind_readonly_vector<dag::Vector<danet::ReflectionVar<danet::Uid>::TimeState>>(gen, "danet_Uid_ts_vector");
-
-  bind_reflection_var<danet::Uid>(gen, "danet_Uid_var");
   //danet::ReflectionVar<DataBlock> bindings
   bind_time_state<DataBlock>(gen, "DataBlock_ts");
   bind_readonly_vector<dag::Vector<danet::ReflectionVar<DataBlock>::TimeState>>(gen, "DataBlock_ts_vector");
@@ -48,5 +43,10 @@ void include_types_2(py::module &gen) {
   bind_readonly_vector<dag::Vector<danet::ReflectionVar<danet::CrewUnitsList>::TimeState>>(gen, "danet_CrewUnitsList_ts_vector");
 
   bind_reflection_var<danet::CrewUnitsList>(gen, "danet_CrewUnitsList_var");
+  //danet::ReflectionVar<float> bindings
+  bind_time_state<float>(gen, "float_ts");
+  bind_readonly_vector<dag::Vector<danet::ReflectionVar<float>::TimeState>>(gen, "float_ts_vector");
+
+  bind_reflection_var<float>(gen, "float_var");
   include_types_3(gen);
 }

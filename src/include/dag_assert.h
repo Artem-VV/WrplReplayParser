@@ -7,11 +7,11 @@
 #include <intrin.h>
 #endif
 
+#include "cpptrace_compat.h"
 #include <fmt/base.h>
 #include <cstdlib>
 #include <cstdarg> // for va_list, va_start, va_end
 #include <cstdint>
-#include <cpptrace/cpptrace.hpp>
 #include "utils.h"
 #include "tracy/Tracy.hpp"
 

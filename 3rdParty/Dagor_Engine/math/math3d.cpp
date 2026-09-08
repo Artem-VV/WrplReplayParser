@@ -57,25 +57,24 @@ const float __declspec(align(16)) math_float_zero[16] = {0, 0, 0, 0, 0, 0, 0, 0,
 const float math_float_zero[16] __attribute__((aligned(16))) = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 #endif
 
-void init_math()
-{
+void init_math() {
   perlin_noise::init_noise(1120272305);
-#if _TARGET_SIMD_SSE
-  _mm_setcsr((_mm_getcsr() & ~_MM_ROUND_MASK) | _MM_FLUSH_ZERO_MASK | _MM_ROUND_NEAREST | 0x40); // 0x40 - denorms are zero.
+#if _TARGET_SIMD_SSE && !defined(__EMSCRIPTEN__) && !defined(__wasm32__)
+  _mm_setcsr((_mm_getcsr() & ~_MM_ROUND_MASK) | _MM_FLUSH_ZERO_MASK | _MM_ROUND_NEAREST |
+             0x40); // 0x40 - denorms are zero.
   // it is helpful to have 0x40 - denorms are zero - flag, for performance reasons.
-  // it should not matter for our math, since we do have _MM_FLUSH_ZERO_MASK (flush-to-zero), but if we load thrash from memory, which
-  // we won't use anyway (consider .w in vertex position), it will affect performance! debug_ctx("set DAZ and RN flags");
+  // it should not matter for our math, since we do have _MM_FLUSH_ZERO_MASK (flush-to-zero), but if we load thrash from
+  // memory, which we won't use anyway (consider .w in vertex position), it will affect performance! debug_ctx("set DAZ
+  // and RN flags");
 #endif
 }
 
-static inline void calc_screen_box(BBox2 &scbox, Point2 pt[8], BBox3 &b, TMatrix4 &gtm)
-{
+static inline void calc_screen_box(BBox2 &scbox, Point2 pt[8], BBox3 &b, TMatrix4 &gtm) {
   scbox.setempty();
   if (b.isempty())
     return;
   for (int i = 0; i < 2; ++i)
-    for (int j = 0; j < 2; ++j)
-    {
+    for (int j = 0; j < 2; ++j) {
       Point4 a1(b.lim[i].x, b.lim[j].y, b.lim[0].z, 1);
       Point4 a2(b.lim[i].x, b.lim[j].y, b.lim[1].z, 1);
       a1 = a1 * gtm;
@@ -89,8 +88,7 @@ static inline void calc_screen_box(BBox2 &scbox, Point2 pt[8], BBox3 &b, TMatrix
     }
 }
 
-static inline int p2get_side(Point2 a, Point2 b, Point2 p)
-{
+static inline int p2get_side(Point2 a, Point2 b, Point2 p) {
   p -= a;
   b = Point2(a.y - b.y, b.x - a.x);
   real c = p * b;
@@ -100,8 +98,7 @@ static inline int p2get_side(Point2 a, Point2 b, Point2 p)
     return 1;
 }
 
-bool is_pt_inscreen_box(Point2 &p, BBox3 &b, TMatrix4 &gtm)
-{
+bool is_pt_inscreen_box(Point2 &p, BBox3 &b, TMatrix4 &gtm) {
   BBox2 sc;
   Point2 pt[8];
   calc_screen_box(sc, pt, b, gtm);
@@ -113,8 +110,7 @@ bool is_pt_inscreen_box(Point2 &p, BBox3 &b, TMatrix4 &gtm)
     return false;
   {
     int a = p2get_side(pt[0], pt[0 + 4], p) + p2get_side(pt[1], pt[1 + 4], p);
-    if (!a)
-    {
+    if (!a) {
       a = p2get_side(pt[0], pt[1], p) + p2get_side(pt[0 + 4], pt[1 + 4], p);
       if (!a)
         return true;
@@ -123,8 +119,7 @@ bool is_pt_inscreen_box(Point2 &p, BBox3 &b, TMatrix4 &gtm)
 
   {
     int a = p2get_side(pt[0], pt[0 + 4], p) + p2get_side(pt[2], pt[2 + 4], p);
-    if (!a)
-    {
+    if (!a) {
       a = p2get_side(pt[0], pt[2], p) + p2get_side(pt[0 + 4], pt[2 + 4], p);
       if (!a)
         return true;
@@ -133,8 +128,7 @@ bool is_pt_inscreen_box(Point2 &p, BBox3 &b, TMatrix4 &gtm)
 
   {
     int a = p2get_side(pt[2], pt[2 + 4], p) + p2get_side(pt[3], pt[3 + 4], p);
-    if (!a)
-    {
+    if (!a) {
       a = p2get_side(pt[2], pt[3], p) + p2get_side(pt[2 + 4], pt[3 + 4], p);
       if (!a)
         return true;
@@ -143,8 +137,7 @@ bool is_pt_inscreen_box(Point2 &p, BBox3 &b, TMatrix4 &gtm)
 
   {
     int a = p2get_side(pt[0], pt[2], p) + p2get_side(pt[1], pt[3], p);
-    if (!a)
-    {
+    if (!a) {
       a = p2get_side(pt[0], pt[1], p) + p2get_side(pt[2], pt[3], p);
       if (!a)
         return true;
@@ -153,8 +146,7 @@ bool is_pt_inscreen_box(Point2 &p, BBox3 &b, TMatrix4 &gtm)
 
   {
     int a = p2get_side(pt[4], pt[6], p) + p2get_side(pt[5], pt[7], p);
-    if (!a)
-    {
+    if (!a) {
       a = p2get_side(pt[4], pt[5], p) + p2get_side(pt[6], pt[7], p);
       if (!a)
         return true;
@@ -163,8 +155,7 @@ bool is_pt_inscreen_box(Point2 &p, BBox3 &b, TMatrix4 &gtm)
 
   {
     int a = p2get_side(pt[1], pt[1 + 4], p) + p2get_side(pt[3], pt[3 + 4], p);
-    if (!a)
-    {
+    if (!a) {
       a = p2get_side(pt[1], pt[3], p) + p2get_side(pt[1 + 4], pt[3 + 4], p);
       if (!a)
         return true;
@@ -189,8 +180,7 @@ void RandomRangedReal::load(class DataBlock &blk, float def_val, float def_dev)
  * calculate the determinant of a 2x2 matrix.
  */
 
-static double det2x2(double a, double b, double c, double d)
-{
+static double det2x2(double a, double b, double c, double d) {
   double ans;
   ans = a * d - b * c;
   return ans;
@@ -208,8 +198,8 @@ static double det2x2(double a, double b, double c, double d)
  *     | a3,  b3,  c3 |
  */
 
-static double det3x3(double a1, double a2, double a3, double b1, double b2, double b3, double c1, double c2, double c3)
-{
+static double det3x3(double a1, double a2, double a3, double b1, double b2, double b3, double c1, double c2,
+                     double c3) {
   double ans;
 
   ans = a1 * det2x2(b2, b3, c2, c3) - b1 * det2x2(a2, a3, c2, c3) + c1 * det2x2(a2, a3, b2, b3);
@@ -222,9 +212,8 @@ static double det3x3(double a1, double a2, double a3, double b1, double b2, doub
  *
  * calculate the determinant of a 4x4 matrix.
  */
-template <class T>
-inline double det4x4(const T &m)
-{
+template<class T>
+inline double det4x4(const T &m) {
   double ans;
   double a1, a2, a3, a4, b1, b2, b3, b4, c1, c2, c3, c4, d1, d2, d3, d4;
 
@@ -276,9 +265,8 @@ double det4x4(const TMatrix4 &m) { return det4x4<TMatrix4>(m); }
  *                     ij
  */
 
-template <class T>
-static void adjoint(const T *in, TMatrix4D *out)
-{
+template<class T>
+static void adjoint(const T *in, TMatrix4D *out) {
   double a1, a2, a3, a4, b1, b2, b3, b4;
   double c1, c2, c3, c4, d1, d2, d3, d4;
 
@@ -342,8 +330,7 @@ static void adjoint(const T *in, TMatrix4D *out)
 
 bool is_invertible(const TMatrix4 &mat) { return fabs(det4x4(mat)) > 1e-15f; }
 
-bool inverse44(const TMatrix4 &in, TMatrix4 &result, float &det)
-{
+bool inverse44(const TMatrix4 &in, TMatrix4 &result, float &det) {
   int i, j;
 
   /* calculate the adjoint matrix */
@@ -371,8 +358,7 @@ bool inverse44(const TMatrix4 &in, TMatrix4 &result, float &det)
   return true;
 }
 
-bool inverse44(const TMatrix4D &in, TMatrix4D &result, double &det)
-{
+bool inverse44(const TMatrix4D &in, TMatrix4D &result, double &det) {
   TMatrix4D temp;
   adjoint(&in, &temp);
   double detd = det4x4(in);
@@ -388,12 +374,10 @@ bool inverse44(const TMatrix4D &in, TMatrix4D &result, double &det)
   return true;
 }
 
-TMatrix4 inverse44(const TMatrix4 &in)
-{
+TMatrix4 inverse44(const TMatrix4 &in) {
   TMatrix4 result;
   float det;
-  if (!inverse44(in, result, det))
-  {
+  if (!inverse44(in, result, det)) {
     G_ASSERTF(0, "Singular matrix, no inverse!");
     return TMatrix4::IDENT;
   }
@@ -404,8 +388,7 @@ TMatrix4 inverse44(const TMatrix4 &in)
 // Builds a matrix that reflects the coordinate system about a plane.
 // Plane supposed to be normalized.
 
-TMatrix4 matrix_reflect(const Plane3 &plane)
-{
+TMatrix4 matrix_reflect(const Plane3 &plane) {
   TMatrix4 result;
 
   result._11 = -2.f * plane.n.x * plane.n.x + 1.f;
@@ -434,13 +417,11 @@ TMatrix4 matrix_reflect(const Plane3 &plane)
 // centerInFrustum = (diff.lengthSq() < afD[2] * afD[2] * (1.f + minSize * minSize / (frustum.zNear * frustum.zNear)));
 
 
-bool test_triangle_sphere_intersection(const Point3 *triangle, const BSphere3 &sphere)
-{
+bool test_triangle_sphere_intersection(const Point3 *triangle, const BSphere3 &sphere) {
   return test_triangle_sphere_intersection(triangle[0], triangle[1], triangle[2], sphere);
 }
 
-bool test_triangle_sphere_intersection(const Point3 &v0, const Point3 &v1, const Point3 &v2, const BSphere3 &sphere)
-{
+bool test_triangle_sphere_intersection(const Point3 &v0, const Point3 &v1, const Point3 &v2, const BSphere3 &sphere) {
   Point3 kdiff = v0 - sphere.c;
   float a00 = (v1 - v0).lengthSq();
   float a01 = (v1 - v0) * (v2 - v0);
@@ -453,199 +434,134 @@ bool test_triangle_sphere_intersection(const Point3 &v0, const Point3 &v1, const
   float t = a01 * b0 - a00 * b1;
   float sqrdist;
 
-  if (s + t <= det)
-  {
-    if (s < 0.f)
-    {
-      if (t < 0.f)
-      {
-        if (b0 < 0.f)
-        {
+  if (s + t <= det) {
+    if (s < 0.f) {
+      if (t < 0.f) {
+        if (b0 < 0.f) {
           t = 0.f;
-          if (-b0 >= a00)
-          {
+          if (-b0 >= a00) {
             s = 1.f;
             sqrdist = a00 + 2.f * b0 + c;
-          }
-          else
-          {
+          } else {
             s = -b0 / a00;
             sqrdist = b0 * s + c;
           }
-        }
-        else
-        {
+        } else {
           s = 0.f;
-          if (b1 >= 0.f)
-          {
+          if (b1 >= 0.f) {
             t = 0.f;
             sqrdist = c;
-          }
-          else if (-b1 >= a11)
-          {
+          } else if (-b1 >= a11) {
             t = 1.f;
             sqrdist = a11 + 2.f * b1 + c;
-          }
-          else
-          {
+          } else {
             t = -b1 / a11;
             sqrdist = b1 * t + c;
           }
         }
-      }
-      else
-      {
+      } else {
         s = 0.f;
-        if (b1 >= 0.f)
-        {
+        if (b1 >= 0.f) {
           t = 0.f;
           sqrdist = c;
-        }
-        else if (-b1 >= a11)
-        {
+        } else if (-b1 >= a11) {
           t = 1.f;
           sqrdist = a11 + 2.f * b1 + c;
-        }
-        else
-        {
+        } else {
           t = -b1 / a11;
           sqrdist = b1 * t + c;
         }
       }
-    }
-    else if (t < 0.f)
-    {
+    } else if (t < 0.f) {
       t = 0.f;
-      if (b0 >= 0.f)
-      {
+      if (b0 >= 0.f) {
         s = 0.f;
         sqrdist = c;
-      }
-      else if (-b0 >= a00)
-      {
+      } else if (-b0 >= a00) {
         s = 1.f;
         sqrdist = a00 + 2.f * b0 + c;
-      }
-      else
-      {
+      } else {
         s = -b0 / a00;
         sqrdist = b0 * s + c;
       }
-    }
-    else
-    {
+    } else {
       float invdet = safeinv(det);
       s *= invdet;
       t *= invdet;
       sqrdist = s * (a00 * s + a01 * t + 2.f * b0) + t * (a01 * s + a11 * t + 2.f * b1) + c;
     }
-  }
-  else
-  {
+  } else {
     float tmp0, tmp1, numer, denom;
 
-    if (s < 0.f)
-    {
+    if (s < 0.f) {
       tmp0 = a01 + b0;
       tmp1 = a11 + b1;
-      if (tmp1 > tmp0)
-      {
+      if (tmp1 > tmp0) {
         numer = tmp1 - tmp0;
         denom = a00 - 2.f * a01 + a11;
-        if (numer >= denom)
-        {
+        if (numer >= denom) {
           s = 1.f;
           t = 0.f;
           sqrdist = a00 + 2.f * b0 + c;
-        }
-        else
-        {
+        } else {
           s = numer / denom;
           t = 1.f - s;
           sqrdist = s * (a00 * s + a01 * t + 2.f * b0) + t * (a01 * s + a11 * t + 2.f * b1) + c;
         }
-      }
-      else
-      {
+      } else {
         s = 0.f;
-        if (tmp1 <= 0.f)
-        {
+        if (tmp1 <= 0.f) {
           t = 1.f;
           sqrdist = a11 + 2.f * b1 + c;
-        }
-        else if (b1 >= 0.f)
-        {
+        } else if (b1 >= 0.f) {
           t = 0.f;
           sqrdist = c;
-        }
-        else
-        {
+        } else {
           t = -b1 / a11;
           sqrdist = b1 * t + c;
         }
       }
-    }
-    else if (t < 0.f)
-    {
+    } else if (t < 0.f) {
       tmp0 = a01 + b1;
       tmp1 = a00 + b0;
-      if (tmp1 > tmp0)
-      {
+      if (tmp1 > tmp0) {
         numer = tmp1 - tmp0;
         denom = a00 - 2.f * a01 + a11;
-        if (numer >= denom)
-        {
+        if (numer >= denom) {
           t = 1.f;
           s = 0.f;
           sqrdist = a11 + 2.f * b1 + c;
-        }
-        else
-        {
+        } else {
           t = numer / denom;
           s = 1.f - t;
           sqrdist = s * (a00 * s + a01 * t + 2.f * b0) + t * (a01 * s + a11 * t + 2.f * b1) + c;
         }
-      }
-      else
-      {
+      } else {
         t = 0.f;
-        if (tmp1 <= 0.f)
-        {
+        if (tmp1 <= 0.f) {
           s = 1.f;
           sqrdist = a00 + 2.f * b0 + c;
-        }
-        else if (b0 >= 0.f)
-        {
+        } else if (b0 >= 0.f) {
           s = 0.f;
           sqrdist = c;
-        }
-        else
-        {
+        } else {
           s = -b0 / a00;
           sqrdist = b0 * s + c;
         }
       }
-    }
-    else
-    {
+    } else {
       numer = a11 + b1 - a01 - b0;
-      if (numer <= 0.f)
-      {
+      if (numer <= 0.f) {
         s = 0.f;
         t = 1.f;
         sqrdist = a11 + 2.f * b1 + c;
-      }
-      else
-      {
+      } else {
         denom = a00 - 2.f * a01 + a11;
-        if (numer >= denom)
-        {
+        if (numer >= denom) {
           s = 1.f;
           t = 0.f;
           sqrdist = a00 + 2.f * b0 + c;
-        }
-        else
-        {
+        } else {
           s = numer / denom;
           t = 1.f - s;
           sqrdist = s * (a00 * s + a01 * t + 2.f * b0) + t * (a01 * s + a11 * t + 2.f * b1) + c;
@@ -657,17 +573,14 @@ bool test_triangle_sphere_intersection(const Point3 &v0, const Point3 &v1, const
   return fabsf(sqrdist) < sphere.r2;
 }
 
-static bool test_line_circle_intersection(const Point2 &start, const Point2 &dir, const Point2 &center, float radius, Point2 &out_t)
-{
+static bool test_line_circle_intersection(const Point2 &start, const Point2 &dir, const Point2 &center, float radius,
+                                          Point2 &out_t) {
   const Point2 dirFromCenter = center - start;
   const float dist2Sq = dir.lengthSq();
-  if (dist2Sq < FLT_EPSILON)
-  {
+  if (dist2Sq < FLT_EPSILON) {
     out_t.x = out_t.y = 0.0f;
     return true;
-  }
-  else
-  {
+  } else {
     float dirsDot = dir * dirFromCenter;
     float segmentDirProjSq = sqr(dirsDot) / dist2Sq;
     float heightSq = dirFromCenter.lengthSq() - segmentDirProjSq;
@@ -681,9 +594,9 @@ static bool test_line_circle_intersection(const Point2 &start, const Point2 &dir
   }
 }
 
-static bool test_segment_cylinder_intersection(const Point3 &p0, const Point3 &p1, const Point3 &cyl_left, const Point3 &cyl_up,
-  const Point3 &cyl_start, float cyl_radius, const Point3 &cyl_dir_norm, float cyl_len)
-{
+static bool test_segment_cylinder_intersection(const Point3 &p0, const Point3 &p1, const Point3 &cyl_left,
+                                               const Point3 &cyl_up, const Point3 &cyl_start, float cyl_radius,
+                                               const Point3 &cyl_dir_norm, float cyl_len) {
   Point3 dir = p1 - p0;
   const float dist = max(dir.length(), 0.01f);
   dir /= dist;
@@ -700,29 +613,23 @@ static bool test_segment_cylinder_intersection(const Point3 &p0, const Point3 &p
     return false;
   else if (rabs(t.x) * t.x > dist2Sq)
     return false;
-  else if (t.x >= 0.0f)
-  {
+  else if (t.x >= 0.0f) {
     Point3 pIn = p0 + dir * t.x;
     float pInProj = (pIn - cyl_start) * cyl_dir_norm;
     return pInProj > 0.f && pInProj < cyl_len;
-  }
-  else if (rabs(t.y) * t.y < dist2Sq)
-  {
+  } else if (rabs(t.y) * t.y < dist2Sq) {
     Point3 pOut = p0 + dir * t.y;
     float pOutProj = (pOut - cyl_start) * cyl_dir_norm;
     return pOutProj > 0.f && pOutProj < cyl_len;
-  }
-  else
-  {
+  } else {
     const Point2 range((p0 - cyl_start) * cyl_dir_norm, (p1 - cyl_start) * cyl_dir_norm);
     return max(range.x, range.y) > 0.0f && min(range.x, range.y) < cyl_len;
   }
   return false;
 }
 
-bool test_triangle_cylinder_intersection(const Point3 &v0, const Point3 &v1, const Point3 &v2, const Point3 &p0, const Point3 &p1,
-  float radius)
-{
+bool test_triangle_cylinder_intersection(const Point3 &v0, const Point3 &v1, const Point3 &v2, const Point3 &p0,
+                                         const Point3 &p1, float radius) {
   Point3 dir = p1 - p0;
   const float lenSq = max(dir.lengthSq(), 0.1f);
   const float len = sqrtf(lenSq);
@@ -745,9 +652,8 @@ bool test_triangle_cylinder_intersection(const Point3 &v0, const Point3 &v1, con
   return t > 0.0f && t < len;
 }
 
-bool test_segment_cylinder_intersection(const Point3 &p0, const Point3 &p1, const Point3 &cylinder_p0, const Point3 &cylinder_p1,
-  float cylinder_radius)
-{
+bool test_segment_cylinder_intersection(const Point3 &p0, const Point3 &p1, const Point3 &cylinder_p0,
+                                        const Point3 &cylinder_p1, float cylinder_radius) {
   Point3 dir = cylinder_p1 - cylinder_p0;
   const float lenSq = max(dir.lengthSq(), 0.1f);
   const float len = sqrtf(lenSq);

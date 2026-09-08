@@ -8,11 +8,6 @@
 #include "pybind11/stl_bind.h"
 void include_types_4(py::module &gen);
 void include_types_3(py::module &gen) {
-  //danet::ReflectionVar<float> bindings
-  bind_time_state<float>(gen, "float_ts");
-  bind_readonly_vector<dag::Vector<danet::ReflectionVar<float>::TimeState>>(gen, "float_ts_vector");
-
-  bind_reflection_var<float>(gen, "float_var");
   //danet::ReflectionVar<std::vector<uint8_t>> bindings
   bind_time_state<std::vector<uint8_t>>(gen, "std_vector_uint8_t__ts");
   bind_readonly_vector<dag::Vector<danet::ReflectionVar<std::vector<uint8_t>>::TimeState>>(gen, "std_vector_uint8_t__ts_vector");
@@ -43,6 +38,11 @@ void include_types_3(py::module &gen) {
   bind_readonly_vector<dag::Vector<danet::ReflectionVar<danet::dummyForFootballStat>::TimeState>>(gen, "danet_dummyForFootballStat_ts_vector");
 
   bind_reflection_var<danet::dummyForFootballStat>(gen, "danet_dummyForFootballStat_var");
+  //danet::ReflectionVar<danet::Uid> bindings
+  bind_time_state<danet::Uid>(gen, "danet_Uid_ts");
+  bind_readonly_vector<dag::Vector<danet::ReflectionVar<danet::Uid>::TimeState>>(gen, "danet_Uid_ts_vector");
+
+  bind_reflection_var<danet::Uid>(gen, "danet_Uid_var");
   //danet::ReflectionVar<Point3> bindings
   bind_time_state<Point3>(gen, "Point3_ts");
   bind_readonly_vector<dag::Vector<danet::ReflectionVar<Point3>::TimeState>>(gen, "Point3_ts_vector");

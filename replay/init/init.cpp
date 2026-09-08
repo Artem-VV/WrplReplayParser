@@ -36,7 +36,7 @@ void initialize(const std::string &game_path, const std::string &grp_dir, const 
                 bool lang, bool mis) {
   if (has_init)
     return;
-
+  LOGI("init started");
   has_init = true;
   g_log_handler.initialize();
   ZoneScoped;
@@ -100,4 +100,5 @@ void initialize(const std::string &game_path, const std::string &grp_dir, const 
   // mpi::players.hello();
   size_t pull_val = framework_primary_pulls;
   G_UNUSED(pull_val);
+  LOGI("init finished");
 }

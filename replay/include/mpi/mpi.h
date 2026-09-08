@@ -13,6 +13,7 @@
 #include "unordered_set"
 #include "type_name.h"
 
+
 struct ParserState;
 
 namespace mpi // message passing interface
@@ -44,11 +45,12 @@ namespace mpi // message passing interface
   class IObject // base class for objects that handle messages
   {
   protected:
-    ParserState * state;
+    ParserState *state;
     ObjectID mpiObjectUID;
 
     void setUID(ObjectID uid) { mpiObjectUID = uid; }
     friend ParserState;
+
   public:
     ObjectExtUID mpiObjectExtUID = INVALID_OBJECT_EXT_UID;
 
@@ -58,7 +60,7 @@ namespace mpi // message passing interface
 
     virtual ~IObject() = default;
 
-    explicit IObject(ParserState * state, ObjectID uid = INVALID_OBJECT_ID) : state(state), mpiObjectUID(uid) {
+    explicit IObject(ParserState *state, ObjectID uid = INVALID_OBJECT_ID) : state(state), mpiObjectUID(uid) {
       DG_ASSERT(this->state);
     }
 
@@ -113,11 +115,11 @@ namespace mpi // message passing interface
       curr_index = 0                        \
   }
 
-#define MPI_SERIALIZER_DEFAULT                                \
-default: {                                                    \
-  EXCEPTION("Unknown id found in message serializer switch"); \
-  break;                                                      \
-}
+#define MPI_SERIALIZER_DEFAULT                                  \
+  default: {                                                    \
+    EXCEPTION("Unknown id found in message serializer switch"); \
+    break;                                                      \
+  }
 
   class Message // base class for all messages
   {
@@ -140,7 +142,7 @@ default: {                                                    \
 
     void checkFieldSize(uint8_t index, BitSize_t size) { idFieldSerializer.checkFieldSize(index, size); }
 
-    inline bool parse(const std::function<bool(const BitStream *, uint32_t)> &cb);
+    inline bool parse(const eastl::function<bool(const BitStream *, uint32_t)> &cb);
 
   private:
     IdFieldSerializer32 idFieldSerializer;
@@ -206,13 +208,13 @@ default: {                                                    \
   IObject *dispatch_object(mpi::ObjectID oid, ObjectExtUID ext_uid, ParserState *state);
 
 
-  inline bool Message::parse(const std::function<bool(const BitStream *, uint32_t)> &cb) {
+  inline bool Message::parse(const eastl::function<bool(const BitStream *, uint32_t)> &cb) {
     ZoneScoped;
     uint32_t fields = this->readFieldsSizeAndFlag();
     if (fields == 0) /* no data was serialized in a message that expects data*/
       return false;
     /* sizes are stored based on # of fields, they are not stored based on a field index, so we need a separate var
- * counting iterations*/
+     * counting iterations*/
     for (uint8_t curr_field_index = 0; fields != 0; curr_field_index++) {
       uint8_t curr_field = 0;
       while (((fields >> curr_field) & 1) == 0)
@@ -222,7 +224,8 @@ default: {                                                    \
       BitSize_t start_index = this->payload.GetReadOffset();
       bool ret = cb(&this->payload, curr_field);
       if (!ret) {
-        LOGE("{} failed to parse field {} (index {}) of mid {:#x}", util::type_name_of_obj(this), curr_field, curr_field_index, this->id);
+        LOGE("{} failed to parse field {} (index {}) of mid {:#x}", util::type_name_of_obj(this), curr_field,
+             curr_field_index, this->id);
       }
       this->checkFieldSize(curr_field_index, this->payload.GetReadOffset() - start_index);
     }

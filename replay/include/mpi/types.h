@@ -55,7 +55,7 @@ namespace danet {
     Psn = 15,
   };
 
-#pragma pack(push, 1) // FUCK OFF COMPILER THIS IS 90 BYTES not 96 CAUSE GAIJIN SAID SO
+  constexpr size_t UID_SIZE = 90;
   struct Uid {
     int64_t account_id{}; // bots are negative
     char name[81]{};
@@ -64,9 +64,8 @@ namespace danet {
     std::string_view get_player_name() const { return std::string_view(name, strnlen(name, sizeof(name))); }
     bool operator==(const Uid &other) const { return std::memcmp(this, &other, sizeof(Uid)) == 0; }
   };
-#pragma pack(pop)
-  G_STATIC_ASSERT(sizeof(danet::Uid) == 90);
-  
+  G_STATIC_ASSERT(sizeof(danet::Uid) == 96);
+
   class WeaponsMask;
 
   // a WeaponMask uses a bitfield to represent what weapons still visually exist
@@ -178,8 +177,7 @@ namespace danet {
   };
   struct CameraData {
     friend bool operator==(const CameraData &lhs, const CameraData &rhs) {
-      return lhs.camera_euler == rhs.camera_euler
-             && lhs.gun_pointer == rhs.gun_pointer;
+      return lhs.camera_euler == rhs.camera_euler && lhs.gun_pointer == rhs.gun_pointer;
     }
 
     Point3 camera_euler;
@@ -192,10 +190,10 @@ public:
   constexpr auto parse(format_parse_context &ctx) { return ctx.begin(); }
   template<typename Context>
   constexpr auto format(danet::AccountType const &val, Context &ctx) const {
-    const char * str = nullptr;
+    const char *str = nullptr;
     switch (val) {
       case danet::None: str = "None"; break;
-        case danet::PC: str = "PC"; break;
+      case danet::PC: str = "PC"; break;
       case danet::Xbox: str = "Xbox"; break;
       case danet::Psn: str = "Psn"; break;
       default: str = "Unknown"; break;
@@ -210,11 +208,12 @@ public:
   constexpr auto parse(format_parse_context &ctx) { return ctx.begin(); }
   template<typename Context>
   constexpr auto format(danet::Uid const &val, Context &ctx) const {
-    return fmt::format_to(ctx.out(), "account_id: {}; name: {}; account_type: {}", val.account_id, val.get_player_name(), val.account_type);
+    return fmt::format_to(ctx.out(), "account_id: {}; name: {}; account_type: {}", val.account_id,
+                          val.get_player_name(), val.account_type);
   }
 };
 
-template <>
+template<>
 struct fmt::formatter<danet::WeaponsMask> {
   constexpr auto parse(format_parse_context &ctx) { return ctx.begin(); }
   template<typename Context>
@@ -223,13 +222,13 @@ struct fmt::formatter<danet::WeaponsMask> {
   }
 };
 
-inline std::string format_bits(const uint8_t* ptr, size_t bitcount) {
+inline std::string format_bits(const uint8_t *ptr, size_t bitcount) {
   std::string out;
   out.reserve(bitcount);
 
   for (size_t i = 0; i < bitcount; ++i) {
     size_t byte_index = i / 8;
-    size_t bit_index  = 7 - (i % 8);   // MSB-first
+    size_t bit_index = 7 - (i % 8); // MSB-first
     bool bit = (ptr[byte_index] >> bit_index) & 1;
     out.push_back(bit ? '1' : '0');
   }
@@ -242,7 +241,8 @@ struct fmt::formatter<danet::WeaponMask> {
   constexpr auto parse(format_parse_context &ctx) { return ctx.begin(); }
   template<typename Context>
   constexpr auto format(danet::WeaponMask const &val, Context &ctx) const {
-    return fmt::format_to(ctx.out(), "WeaponMask(weapon_index: {}, ammo_count: {}, mask: {})", val.get_weapon_index(), val.get_num_weapons(), format_bits(val.get_mask_c(), val.get_num_weapons()));
+    return fmt::format_to(ctx.out(), "WeaponMask(weapon_index: {}, ammo_count: {}, mask: {})", val.get_weapon_index(),
+                          val.get_num_weapons(), format_bits(val.get_mask_c(), val.get_num_weapons()));
   }
 };
 
@@ -252,20 +252,20 @@ public:
   constexpr auto parse(format_parse_context &ctx) { return ctx.begin(); }
   template<typename Context>
   constexpr auto format(danet::Country const &val, Context &ctx) const {
-    const char * str = nullptr;
-    switch (val){
+    const char *str = nullptr;
+    switch (val) {
       case danet::USA: str = "USA"; break;
-        case danet::GERMANY: str = "GERMANY"; break;
-        case danet::RUSSIA: str = "RUSSIA"; break;
-        case danet::BRITAIN: str = "BRITAIN"; break;
-        case danet::JAPAN: str = "JAPAN"; break;
-        case danet::CHINA: str = "CHINA"; break;
-        case danet::FRANCE: str = "FRANCE"; break;
-        case danet::ITALY: str = "ITALY"; break;
-        
-        case danet::SWEDEN: str = "SWEDEN"; break;
-        case danet::ISRAEL: str = "ISRAEL"; break;
-        default: str = "UNKNOWN"; break;
+      case danet::GERMANY: str = "GERMANY"; break;
+      case danet::RUSSIA: str = "RUSSIA"; break;
+      case danet::BRITAIN: str = "BRITAIN"; break;
+      case danet::JAPAN: str = "JAPAN"; break;
+      case danet::CHINA: str = "CHINA"; break;
+      case danet::FRANCE: str = "FRANCE"; break;
+      case danet::ITALY: str = "ITALY"; break;
+
+      case danet::SWEDEN: str = "SWEDEN"; break;
+      case danet::ISRAEL: str = "ISRAEL"; break;
+      default: str = "UNKNOWN"; break;
     }
     return format_to(ctx.out(), "{}({})", static_cast<int>(val), str);
   }

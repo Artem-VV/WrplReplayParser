@@ -3,12 +3,13 @@ from .obj_base import ReflectionVarMeta as Var
 from .obj_base import SimpleVar as SVar
 from .obj_base import Method as Method
 
+
 class MPlayer(ReflectableObject):
     public = [
         SVar("std::unordered_set<unit::Unit*>", "currentOwnedUnits"),
         SVar("std::vector<unit::Unit*>", "allOwnedUnits")
     ]
-    uid = Var("danet::Uid", 2)
+    uid = Var("danet::Uid", 2, "UidCoder")
     invitedNickName = Var("std::string", 3)
     nickLocKey = Var("std::string", 4, "TranslatedCoder")
     ClanTag = Var("std::string", 5)
@@ -20,7 +21,7 @@ class MPlayer(ReflectableObject):
     memberId = Var("uint16_t", 11)
     customState = Var("DataBlock", 12)
     score = Var("uint16_t", 13)
-    dummyForSupportPlanes = Var("std::array<ecs::EntityId, 20>", 14) # TODO, define custom type?
+    dummyForSupportPlanes = Var("std::array<ecs::EntityId, 20>", 14)  # TODO, define custom type?
     dummyForCrewUnitsList = Var("danet::CrewUnitsList", 15)
     disabledByMatchingSlots = Var("uint32_t", 16)
     brokenSlots = Var("uint32_t", 17)
@@ -57,6 +58,7 @@ class MPlayer(ReflectableObject):
     rageTokens = Var("uint16_t", 48)
     numFreeSpareUsed = Var("uint32_t", 50)
 
+
 class TeamData(ReflectableObject):
     score = Var("uint16_t", 2)
     tickets = Var("uint16_t", 3)
@@ -65,8 +67,10 @@ class TeamData(ReflectableObject):
     spawnScore = Var("uint32_t", 6)
     roundScore = Var("float", 7)
 
+
 class GlobalElo(ReflectableObject):
     teamAvgEloRatings = Var("Point3", 2)
+
 
 class GeneralState(ReflectableObject):
     lastSuperArtilleryTime = Var("float", 2)
@@ -79,14 +83,13 @@ class GeneralState(ReflectableObject):
     waterWindStrengthClamp = Var("Point2", 0xc, "WeirdFloatSerializer")
     weatherEffectsDummyVar = Var("danet::WeatherEffects", 0xd)
     timeLeft = Var("uint16_t", 6)
-    dummyForBombingEvent = Var("bool", 7, "InvalidSerializer") # TODO dummy value
-    dummyForUnlimitedControlEvent = Var("bool", 0xb, "InvalidSerializer") # TODO dummy value
+    dummyForBombingEvent = Var("bool", 7, "InvalidSerializer")  # TODO dummy value
+    dummyForUnlimitedControlEvent = Var("bool", 0xb, "InvalidSerializer")  # TODO dummy value
     customState = Var("DataBlock", 8)
     dummyForMapTimers = Var("Point2", 15)
     totalDomTeam = Var("uint8_t", 16)
     totalDomTime = Var("uint16_t", 17)
     totalDomMult = Var("uint8_t", 18)
-
 
 
 class MissionArea(ReplicatedObject):
@@ -103,8 +106,10 @@ class MissionZone(ReplicatedObject):
     armyNo = Var("uint8_t", 2)
     flags = Var("uint16_t", 3)
 
+
 class BombingZone(MissionZone):
     curZoneIntegrity = Var("float", 0x43)
+
 
 class CaptureZone(MissionZone):
     mpTimeX100 = Var("int8_t", 0x43)
@@ -113,14 +118,19 @@ class CaptureZone(MissionZone):
     dummyVarForCapturers = Var("std::vector<danet::UnitId, uint8_t>", 0x46)
     dummyVarForCapturePart = Var("std::vector<danet::UnitIdStruct, uint8_t>", 0x47)
     dummyVarForNumOfActiveCapturers = Var("std::vector<uint8_t, uint8_t>", 0x48)
+
+
 class RearmZone(MissionZone):
     pass
+
 
 class ExitZone(MissionZone):
     pass
 
+
 class PickupZone(MissionZone):
     showOnTacticalMap = Var("bool", 0x43)
+
 
 class BaseExtReflectable(ReflectableObject):
     protected = [
