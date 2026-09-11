@@ -18,11 +18,11 @@ void include_types_2(py::module &gen) {
   bind_readonly_vector<dag::Vector<danet::ReflectionVar<danet::UnitId>::TimeState>>(gen, "danet_UnitId_ts_vector");
 
   bind_reflection_var<danet::UnitId>(gen, "danet_UnitId_var");
-  //danet::ReflectionVar<uint64_t> bindings
-  bind_time_state<uint64_t>(gen, "uint64_t_ts");
-  bind_readonly_vector<dag::Vector<danet::ReflectionVar<uint64_t>::TimeState>>(gen, "uint64_t_ts_vector");
+  //danet::ReflectionVar<int64_t> bindings
+  bind_time_state<int64_t>(gen, "int64_t_ts");
+  bind_readonly_vector<dag::Vector<danet::ReflectionVar<int64_t>::TimeState>>(gen, "int64_t_ts_vector");
 
-  bind_reflection_var<uint64_t>(gen, "uint64_t_var");
+  bind_reflection_var<int64_t>(gen, "int64_t_var");
   //danet::ReflectionVar<DataBlock> bindings
   bind_time_state<DataBlock>(gen, "DataBlock_ts");
   bind_readonly_vector<dag::Vector<danet::ReflectionVar<DataBlock>::TimeState>>(gen, "DataBlock_ts_vector");

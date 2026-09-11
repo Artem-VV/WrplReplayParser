@@ -21,7 +21,7 @@ extern template class danet::ReflectionVar<char>;
 extern template class danet::ReflectionVar<danet::WeatherEffect>;
 extern template class danet::ReflectionVar<std::vector<danet::WeatherEffect>>;
 extern template class danet::ReflectionVar<danet::UnitId>;
-extern template class danet::ReflectionVar<uint64_t>;
+extern template class danet::ReflectionVar<int64_t>;
 extern template class danet::ReflectionVar<DataBlock>;
 extern template class danet::ReflectionVar<danet::Country>;
 extern template class danet::ReflectionVar<std::array<ecs::EntityId,20>>;

@@ -106,7 +106,7 @@ BOOST_DESCRIBE_STRUCT(UnitIdStruct, (), (uid, thang))
   };
 BOOST_DESCRIBE_STRUCT(dummyForDeathInfo, (), (v1, v2, v3, v4, v5))
   struct KillerStruct {
-    uint64_t player_id{};
+    int64_t player_id{};
     uint16_t uid{};
     std::string vehicle{};
     bool operator==(const KillerStruct& other) const = default;

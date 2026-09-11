@@ -36,9 +36,9 @@ void initialize(const std::string &game_path, const std::string &grp_dir, const 
                 bool lang, bool mis) {
   if (has_init)
     return;
+  g_log_handler.initialize();
   LOGI("init started");
   has_init = true;
-  g_log_handler.initialize();
   ZoneScoped;
   if (grp_dir.empty()) {
     g_grp_manager.initialize((fs::path) game_path / "content" / "base" / "res" / "tanks");

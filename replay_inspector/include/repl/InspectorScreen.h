@@ -603,7 +603,7 @@ protected:
     for (auto objs: this->state.Zones) {
 
       auto curr_obj = *objs->curr();
-      if (!curr_obj)
+      if (!curr_obj || !curr_obj->area)
         continue;
       auto area_flags = *curr_obj->flags.curr();
       auto valid_air = info.drawn_units == UnitType::AircraftType && (area_flags & 1 << 9) != 0;

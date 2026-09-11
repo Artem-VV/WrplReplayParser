@@ -1,17 +1,21 @@
 from .DataTypes import DataTypeRegister
 from .custom_rw import *
 
+
 class bool_reg(DataTypeRegister):
     name = "bool"
     is_pod = True
+
 
 class char_reg(DataTypeRegister):
     name = "char"
     is_pod = True
 
+
 class uint8_t_reg(DataTypeRegister):
     name = "uint8_t"
     is_pod = True
+
 
 class int8_t_reg(DataTypeRegister):
     name = "int8_t"
@@ -32,13 +36,21 @@ class uint64_t_reg(DataTypeRegister):
     name = "uint64_t"
     is_pod = True
 
+
+class int64_t_reg(DataTypeRegister):
+    name = "int64_t"
+    is_pod = True
+
+
 class int_reg(DataTypeRegister):
     name = "int"
     is_pod = True
 
+
 class float_reg(DataTypeRegister):
     name = "float"
     is_pod = True
+
 
 class std_string_reg(DataTypeRegister):
     name = "std::string"
@@ -51,6 +63,7 @@ class std_string_reg(DataTypeRegister):
 class dblk_reg(DataTypeRegister):
     name = "DataBlock"
     is_pod = True
+
 
 class EntityId_reg(DataTypeRegister):
     name = "ecs::EntityId"
@@ -68,14 +81,14 @@ class vector_reg(DataTypeRegister):
     @staticmethod
     def serialize_name(datatype: 'DataTypeCompiled'):
         base = datatype.datatype.reg.name
-        return f"{base}<{str(datatype.template_args[0])}>" # the second arg is only for code generation
-
+        return f"{base}<{str(datatype.template_args[0])}>"  # the second arg is only for code generation
 
 
 class zigZagInt_reg(DataTypeRegister):
     name = "danet::zigZagInt"
     custom_loader = zigZagInt_loader
     custom_writer = zigZagInt_writer
+
     @staticmethod
     def serialize_name(datatype: 'DataTypeCompiled'):
         return "int"
@@ -90,6 +103,7 @@ class zigZagVector_reg(DataTypeRegister):
     template_type_args = [DataTypeType]
     custom_loader = zigZagVector_loader
     custom_writer = zigZagVector_writer
+
     @staticmethod
     def serialize_name(datatype: 'DataTypeCompiled'):
         base = "std::vector"
@@ -98,6 +112,7 @@ class zigZagVector_reg(DataTypeRegister):
     @staticmethod
     def get_base_name(datatype: 'DataTypeCompiled'):
         return "std::vector"
+
 
 class array_reg(DataTypeRegister):
     name = "std::array"
