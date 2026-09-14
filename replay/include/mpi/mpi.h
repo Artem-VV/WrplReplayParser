@@ -61,7 +61,7 @@ namespace mpi // message passing interface
     virtual ~IObject() = default;
 
     explicit IObject(ParserState *state, ObjectID uid = INVALID_OBJECT_ID) : state(state), mpiObjectUID(uid) {
-      DG_ASSERT(this->state);
+      G_ASSERT(this->state);
     }
 
     [[nodiscard]] ObjectID getUID() const { return mpiObjectUID; }

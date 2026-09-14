@@ -226,11 +226,11 @@ void FlattenMissionBlk(DataBlock *to, const DataBlock *from) {
   to->appendParamsFrom(from);
 }
 
-DataBlock* CreateFlatBlk(std::string &miss_blk, int in_rank, bool addCustomBlock, bool addCustomScore,
-                                   bool addCustomTriggers, bool addCustomVars) {
+DataBlock *CreateFlatBlk(std::string &miss_blk, int in_rank, bool addCustomBlock, bool addCustomScore,
+                         bool addCustomTriggers, bool addCustomVars) {
   ::rank = in_rank;
   DataBlock blk{};
-  EXCEPTION_IF_FALSE(dblk::load(blk, miss_blk.c_str()), "failed to load mission blk");
+  G_CHECKF(dblk::load(blk, miss_blk.c_str()), "failed to load mission blk");
   auto outBlk = new DataBlock();
   FlattenMissionBlk(outBlk, &blk);
   auto mission_settings_blk = outBlk->addBlock("mission_settings");
@@ -244,19 +244,19 @@ DataBlock* CreateFlatBlk(std::string &miss_blk, int in_rank, bool addCustomBlock
     fs::path VarsBlk = base_path / R"(debugging\DumpMission\CustomVars.blk)";
     if (addCustomBlock) {
       DataBlock temp{};
-      EXCEPTION_IF_FALSE(dblk::load(temp, SettingsBlk.string()), "Failed to parse CustomBlk");
+      G_CHECKF(dblk::load(temp, SettingsBlk.string()), "Failed to parse CustomBlk");
       appendBlock(mission2_blk, &temp);
     }
     if (addCustomScore) {
       mission_blk->addBool("useSpawnScore", true);
 
       DataBlock temp{};
-      EXCEPTION_IF_FALSE(dblk::load(temp, ScoreBlk.string()), "Failed to parse CustomScoreBlk");
+      G_CHECKF(dblk::load(temp, ScoreBlk.string()), "Failed to parse CustomScoreBlk");
       appendBlock(mission2_blk, &temp);
     }
     if (addCustomTriggers) {
       DataBlock temp{};
-      EXCEPTION_IF_FALSE(dblk::load(temp, TriggersBlk.string()), "Failed to parse TriggersBlk");
+      G_CHECKF(dblk::load(temp, TriggersBlk.string()), "Failed to parse TriggersBlk");
       appendBlock(mission2_blk, &temp);
       auto triggers_blk = outBlk->addBlock("triggers");
       for (int b = 0; b < temp.blockCount(); b++) {
@@ -267,10 +267,10 @@ DataBlock* CreateFlatBlk(std::string &miss_blk, int in_rank, bool addCustomBlock
     }
     /*if (addCustomVars) {
       std::ifstream file{VarsBlk};
-      EXCEPTION_IF_FALSE(file.is_open(), "failed to open file");
+      G_CHECKF(file.is_open(), "failed to open file");
       SharedPtr<DataBlock> _blk = SharedPtr<DataBlock>::make(outBlk->getNameMap());
       std::vector<char> characters((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-      EXCEPTION_IF_FALSE(_blk->loadText(characters), "Failed to parse CustomVarsBlk");
+      G_CHECKF(_blk->loadText(characters), "Failed to parse CustomVarsBlk");
       auto triggers_blk = outBlk->addBlock("variables");
 
       for (int b = 0; b < _blk->paramCount(); b++) {
@@ -295,7 +295,7 @@ DataBlock* CreateFlatBlk(std::string &miss_blk, int in_rank, bool addCustomBlock
   };*/
 
   // used to remove unneeded player declarations
-  //outBlk->cleanupParamsByCB(cbp);
+  // outBlk->cleanupParamsByCB(cbp);
   return outBlk;
 }
 
@@ -310,9 +310,9 @@ int main() {
   bool disableAirSsawn = false;
   bool disableBomberSpawn = false;
   std::string vromfs_mission_path = "gamedata/missions/cta/tanks/port_novorossiysk/port_novorossiysk_aslt_dom.blk";
-  //vromfs_mission_path = "gamedata/missions/cta/tanks/tunisia/tunisia_dom.blk";
-  // std::string vromfs_mission_path = "gamedata/missions/cta/tanks/mozdok/mozdok_dom.blk";
-  //  AN ERROR HAS OCCURED
+  // vromfs_mission_path = "gamedata/missions/cta/tanks/tunisia/tunisia_dom.blk";
+  //  std::string vromfs_mission_path = "gamedata/missions/cta/tanks/mozdok/mozdok_dom.blk";
+  //   AN ERROR HAS OCCURED
 #ifdef _TARGET_PC_LINUX
   std::string dump_path = R"(/mnt/d/GoogleDriveWtMission/dumpTest2.blk)";
   std::string p1 = R"(/mnt/d/SteamLibrary/steamapps/common/War Thunder/mis.vromfs.bin)";
@@ -322,10 +322,10 @@ int main() {
   // std::string p1 = R"(D:\SteamLibrary\steamapps\common\War Thunder\mis.vromfs.bin)";
   std::string p1 = R"(D:\SteamLibrary\steamapps\common\War Thunder\mis.vromfs.bin)";
 #endif
-  // EXCEPTION_IF_FALSE(file_mgr.loadVromfs(p2), "Ah shit");
-  EXCEPTION_IF_FALSE(file_mgr.mountVromfs(p1), "Ah shit");
-  DataBlock* outBlk = CreateFlatBlk(vromfs_mission_path, 10, false, false, false, false);
-  EXCEPTION_IF_FALSE(outBlk, "failed to create flat blk");
+  // G_CHECKF(file_mgr.loadVromfs(p2), "Ah shit");
+  G_CHECKF(file_mgr.mountVromfs(p1), "Ah shit");
+  DataBlock *outBlk = CreateFlatBlk(vromfs_mission_path, 10, false, false, false, false);
+  G_CHECKF(outBlk, "failed to create flat blk");
   // outBlk->getBlock("triggers", 0)->getBlock("aslt_check_capture", 0)->getBlock("actions",
   // 0)->getBlock("triggerEnable", 0)->addStr("target", "on_capture_respawn"); outBlk->getBlock("triggers",
   // 0)->getBlock("aslt_spawn_captured", 0)->getBlock("actions", 0)->getBlock("triggerEnable", 0)->addStr("target",
@@ -334,7 +334,7 @@ int main() {
   std::ostringstream ss;
   std::ofstream out{dump_path};
   auto cb = &out;
-  EXCEPTION_IF_FALSE(out, "failed to open file for write({})", dump_path.c_str());
+  G_CHECKF(out, "failed to open file for write({})", dump_path.c_str());
   outBlk->printBlock(ss);
   auto s = ss.str();
   LOGI("good: {}", out.good());

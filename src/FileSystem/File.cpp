@@ -60,7 +60,7 @@ void HostFile::init_hf() {
   auto actual = (HostFileIndex *) this->index.get();
   if (actual->file_length != -1) {
     this->file_stream.open(actual->name, std::ios::binary);
-    DG_ASSERT(this->file_stream.is_open());
+    G_ASSERT(this->file_stream.is_open());
     this->f_length = actual->file_length;
     this->read_offs = 0;
   }

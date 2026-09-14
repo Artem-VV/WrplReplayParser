@@ -61,10 +61,10 @@ void grpManager::initialize(const fs::path &fs_path) {
           if (!doesItemApply(name))
             continue;
           auto &entry = grp->resTable[rd->resId];
-          DG_ASSERT(entry.classId == rd->classId);
+          G_ASSERT(entry.classId == rd->classId);
           // for now, we are only parsing this, so lets make sure of that
           // our previous 'doesItemApply' should make this not happen anyways
-          DG_ASSERT(entry.classId == GeomNodeTreeGameResClassId);
+          G_ASSERT(entry.classId == GeomNodeTreeGameResClassId);
           size_t item_size = getEntrySize(grp, rd, grp_data.cb.fileHandle->length());
           void *ptr = malloc(item_size);
           grp_data.cb.seekto(entry.offset);
@@ -87,7 +87,7 @@ bool grpManager::getTree(const std::string &name, GeomNodeTree &load_into) {
   if (entry == this->res_map.end()) {
     return false;
   }
-  DG_ASSERT(entry->second.class_id == GeomNodeTreeGameResClassId);
+  G_ASSERT(entry->second.class_id == GeomNodeTreeGameResClassId);
   MemGeneralLoadCB cb{this->data[entry->second.index], static_cast<int>(entry->second.size)};
   load_into.load(cb);
   return true;

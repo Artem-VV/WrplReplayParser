@@ -59,11 +59,11 @@ void initialize(const std::string &game_path, const std::string &grp_dir, const 
   std::string p5 = ("char.vromfs.bin");
   if (fonts) {
     std::string p6 = ("ui/fonts.vromfs.bin");
-    EXCEPTION_IF_FALSE(file_mgr.mountVromfs(p6), "{} does not exist", p6);
+    G_CHECKF(file_mgr.mountVromfs(p6), "{} does not exist", p6);
   }
-  EXCEPTION_IF_FALSE(file_mgr.mountVromfs(p1), "{} does not exist", p1);
-  EXCEPTION_IF_FALSE(file_mgr.mountVromfs(p2), "{} does not exist", p2);
-  EXCEPTION_IF_FALSE(file_mgr.mountVromfs(p5), "{} does not exist", p5);
+  G_CHECKF(file_mgr.mountVromfs(p1), "{} does not exist", p1);
+  G_CHECKF(file_mgr.mountVromfs(p2), "{} does not exist", p2);
+  G_CHECKF(file_mgr.mountVromfs(p5), "{} does not exist", p5);
   if (mis)
     file_mgr.mountVromfs(p3); // optional
   if (lang)

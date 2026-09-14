@@ -233,7 +233,7 @@ template<typename T, bool do_compare, bool take_ownership, bool create_default>
 T *ObjectRewindState<T, do_compare, take_ownership, create_default>::reserveOne() {
   ZoneScopedN("ObjectRewindState::reserveOne");
 #if LDAG_DBGLEVEL > 0
-  DG_ASSERT(!hasReserved);
+  G_ASSERT(!hasReserved);
   hasReserved = true;
 #endif
   auto back = &this->time_states.push_back();

@@ -6,16 +6,8 @@
 
 bool separateServerSideDetection_g = true;
 bool resyncSaclosGuidanceParams = true; // actually known to be true, hopefully
-#if LDAG_DBGLEVEL > 0
-#define RET_FAIL(op) G_ASSERT((op));
-#else
-#define RET_FAIL(op) \
-  do {               \
-    if (!(op)) {     \
-      return false;  \
-    }                \
-  } while (0)
-#endif
+
+#define RET_FAIL(op) G_ASSERT_RETURN((op), false);
 bool SensorsControlStates::deserialize(BitStream &bs) {
   first_bool = bs.ReadBit();
   uint8_t sensor_type;
