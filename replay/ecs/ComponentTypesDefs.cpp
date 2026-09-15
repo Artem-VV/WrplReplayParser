@@ -905,3 +905,5 @@ ECS_AUTO_REGISTER_COMPONENT(InvalidType, "pickup_airdrop__controller", nullptr);
 ECS_AUTO_REGISTER_COMPONENT(InvalidType, "human_segmented_physics", nullptr);
 ECS_AUTO_REGISTER_COMPONENT(CapsulesAOHolder, "capsules_ao", nullptr);
 ECS_AUTO_REGISTER_COMPONENT(aimmem::AimingMemPoints, "player__aiming_mem_points", nullptr);
+ECS_AUTO_REGISTER_COMPONENT(mat44f, "close_geometry_prev_to_curr_frame_transform", nullptr);
+ECS_AUTO_REGISTER_COMPONENT(mat44f, "close_geometry_prev_transform", nullptr);
