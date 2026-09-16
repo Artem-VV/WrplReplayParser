@@ -442,8 +442,8 @@ namespace unit {
     if (!IdFieldSerializer.readFieldsIndex(bs)) {
       return false;
     }
-    std::ostringstream ret = FormatHexToStream(data.data);
-    LOGI("{}", ret.str());
+    // std::ostringstream ret = FormatHexToStream(data.data);
+    // LOGI("{}", ret.str());
     for (uint16_t i = 0; i < count; ++i) {
       auto fieldId = IdFieldSerializer.getFieldId(i);
       auto f_size_bits = IdFieldSerializer.getFieldSize(i);
