@@ -147,9 +147,7 @@ namespace unit {
     return -1;
   }
 
-#define RET_FAIL(opt) \
-  if (!(opt))         \
-  return false
+#define RET_FAIL(opt) G_ASSERT_RETURN(opt, false)
 
   bool getWeaponPresetAndSlot(const DataBlock &weapons, int WeaponSlotNid, int WeaponPresetNid,
                               DataBlock &custom_weapons, int custom_blk_index, DataBlock const **WeaponSlot,
@@ -444,7 +442,8 @@ namespace unit {
     if (!IdFieldSerializer.readFieldsIndex(bs)) {
       return false;
     }
-
+    std::ostringstream ret = FormatHexToStream(data.data);
+    LOGI("{}", ret.str());
     for (uint16_t i = 0; i < count; ++i) {
       auto fieldId = IdFieldSerializer.getFieldId(i);
       auto f_size_bits = IdFieldSerializer.getFieldSize(i);
@@ -487,6 +486,7 @@ namespace unit {
             RET_FAIL(t_bs.Read(weapon.launcher));
             RET_FAIL(t_bs.Read(weapon.bullet));
             RET_FAIL(t_bs.Read(weapon.count));
+            RET_FAIL(t_bs.Read(weapon.unk));
           }
           RET_FAIL(t_bs.Read(sz));
           weapon_mods.resize(sz);

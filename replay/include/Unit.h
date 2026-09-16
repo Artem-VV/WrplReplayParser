@@ -150,6 +150,7 @@ namespace unit {
     std::string launcher{};
     std::string bullet{};
     uint16_t count;
+    uint8_t unk;
   };
 
   struct Ammunition {
