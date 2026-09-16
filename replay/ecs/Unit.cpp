@@ -42,7 +42,7 @@ namespace unit {
       }
 
       nodes.emplace_back(i, tree->getParentNodeIdx(i));
-      DG_ASSERT(nodes.capacity() == last_size);
+      G_ASSERT(nodes.capacity() == last_size);
       name_to_idx[name] = &nodes.back();
     }
   }
@@ -163,9 +163,7 @@ namespace unit {
     return -1;
   }
 
-#define RET_FAIL(opt) \
-  if (!(opt))         \
-  return false
+#define RET_FAIL(opt) G_ASSERT_RETURN(opt, false)
 
   bool getWeaponPresetAndSlot(const DataBlock &weapons, int WeaponSlotNid, int WeaponPresetNid,
                               DataBlock &custom_weapons, int custom_blk_index, DataBlock const **WeaponSlot,
@@ -296,7 +294,7 @@ namespace unit {
     this->name_index = translate::get_locale_index(fmt::format("weapons/{}", this->weapon_name));
     this->name_index_short = translate::get_locale_index(fmt::format("weapons/{}/short", this->weapon_name));
     if (this->weapon_name != "dummy_weapon" && strcmp("boosters", trigger) != 0)
-      DG_ASSERT(this->name_index != translate::INVALID_TRANSLATE_INDEX);
+      G_ASSERT(this->name_index != translate::INVALID_TRANSLATE_INDEX);
 
     weapons_count[weapon_id]++;
     if (unit->hasTree()) {
@@ -540,7 +538,8 @@ namespace unit {
     if (!IdFieldSerializer.readFieldsIndex(bs)) {
       return false;
     }
-
+    // std::ostringstream ret = FormatHexToStream(data.data);
+    // LOGI("{}", ret.str());
     for (uint16_t i = 0; i < count; ++i) {
       auto fieldId = IdFieldSerializer.getFieldId(i);
       auto f_size_bits = IdFieldSerializer.getFieldSize(i);
@@ -583,6 +582,7 @@ namespace unit {
             RET_FAIL(t_bs.Read(weapon.launcher));
             RET_FAIL(t_bs.Read(weapon.bullet));
             RET_FAIL(t_bs.Read(weapon.count));
+            RET_FAIL(t_bs.Read(weapon.unk));
           }
           RET_FAIL(t_bs.Read(sz));
           weapon_mods.resize(sz);

@@ -65,7 +65,7 @@ void parse(SharedPtr<DataBlock> &to, SharedPtr<DataBlock> &from, import_data pre
   parsed.emplace(file_name);
   import_data imp_data{from, prev};
   SharedPtr<DataBlock> blk = SharedPtr<DataBlock>::make();
-  EXCEPTION_IF_FALSE(load(*blk.get(), file_name.c_str()), "failed to import blk(%s)", file_name.c_str());
+  G_CHECKF(load(*blk.get(), file_name.c_str()), "failed to import blk(%s)", file_name.c_str());
   int importNid = from->getNameId("imports");
   int importRecordNid = from->getNameId("import_record");
   int importAreasNid = from->getNameId("areas");
@@ -197,12 +197,12 @@ int main() {
   std::string dump_path = R"(D:/GoogleDriveWtMission/dump_t.blk)";
   std::string p1 = R"(D:\SteamLibrary\steamapps\common\War Thunder\cache\binary.2.53.0\mis.vromfs.bin)";
 #endif
-  EXCEPTION_IF_FALSE(file_mgr.mountVromfs(p1), "Ah shit");
+  G_CHECKF(file_mgr.mountVromfs(p1), "Ah shit");
 
   SharedPtr<DataBlock> blk = SharedPtr<DataBlock>::make();
   // SharedPtr<DataBlock> tblk = SharedPtr<DataBlock>::make();
-  EXCEPTION_IF_FALSE(load(*blk.get(), vromfs_mission_path.c_str()), "failed to load mission blk");
-  // EXCEPTION_IF_FALSE(load(*tblk.get(), mis2Path), "failed to load mission blk");
+  G_CHECKF(load(*blk.get(), vromfs_mission_path.c_str()), "failed to load mission blk");
+  // G_CHECKF(load(*tblk.get(), mis2Path), "failed to load mission blk");
   // tblk->printBlock(0, std::cout);
   SharedPtr<DataBlock> outBlk = SharedPtr<DataBlock>::make(blk->getNameMap());
   FlattenMissionBlk(outBlk, blk);

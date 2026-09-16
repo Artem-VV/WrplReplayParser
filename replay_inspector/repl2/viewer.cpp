@@ -356,7 +356,7 @@ int main(int argc, char *argv[]) {
   }
   file_mgr.add_mount(map_path);
   DataBlock conf_blk;
-  G_ASSERT(dblk::load(conf_blk, config_path.c_str()));
+  G_CHECK(dblk::load(conf_blk, config_path.c_str()));
   bool bin_is_linux_path = conf_blk.getBool("bin_is_linux_path", false);
   auto bin_path = conf_blk.getStr("bin_path", nullptr);
   default_minimap_size = conf_blk.getPoint2("default_minimap_size", default_minimap_size);

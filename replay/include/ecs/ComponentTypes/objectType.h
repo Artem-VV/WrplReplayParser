@@ -54,8 +54,8 @@ namespace ecs {
         auto it = container.begin() + (hashIt - hashContainer.begin());
         // Assume that no collisions in searched / instance string
         // return (!str.str || strcmp(it->first.c_str(), str.str) == 0) ? it : container.end();
-        EXCEPTION_IF_FALSE(!str.str || !strcmp(it->first.c_str(), str.str),
-                           "Search key hash collision %#x: '%s' != '%s'", str.hash, str.str, it->first.c_str());
+        G_CHECKF(!str.str || !strcmp(it->first.c_str(), str.str), "Search key hash collision {:#x}: '{}' != '{}'",
+                 str.hash, str.str, it->first.c_str());
         return it;
       } else
         return findAsWithCollision(hashIt, str);

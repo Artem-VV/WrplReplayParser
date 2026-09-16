@@ -32,7 +32,7 @@ public:
 
 private:
   T *getPtr() const {
-    DG_ASSERT(initialized == true);
+    G_ASSERT(initialized == true);
     return (T *) &obj;
   }
   alignas(T) mutable uint8_t obj[sizeof(T)];

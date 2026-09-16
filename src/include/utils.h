@@ -9,9 +9,6 @@
 #include "fmt/base.h"
 #include "fmt/format.h"
 #include <iostream>
-#include <cstdlib>
-#include <cstdarg> // for va_list, va_start, va_end
-#include <cstdint>
 #include <sstream>
 #include <span>
 #include "cpptrace_compat.h"
@@ -23,7 +20,7 @@ extern bool DO_VERBOSE;
 
 class ExceptionException : public std::runtime_error {
 public:
-  explicit ExceptionException(std::string msg) : std::runtime_error(std::move(msg)) {}
+  explicit ExceptionException(const std::string &msg) : std::runtime_error(msg) {}
 
   const char *what() const noexcept override { return std::runtime_error::what(); }
 };
@@ -32,23 +29,6 @@ public:
 
 
 #define EXCEPTION(format_, ...) fatal(__FILE__, __LINE__, __FUNCTION__, fmt::format(format_ __VA_OPT__(, ) __VA_ARGS__))
-
-#define EXCEPTION_IF_FALSE(cond, ...) \
-  do {                                \
-    if (!(cond))                      \
-      EXCEPTION(__VA_ARGS__);         \
-  } while (0)
-
-inline int popcount(uint32_t val) {
-#ifdef _MSC_VER
-  return _mm_popcnt_u32(val);
-#else
-  return std::__popcount(val);
-#endif
-}
-
-#define G_UNUSED(x)    ((void) (x))
-#define G_UNREFERENCED G_UNUSED
 
 
 /// Given a stream and a buffer, will attempt to write python like bytes to it
@@ -73,16 +53,20 @@ inline void FormatOnlyTextToStream(std::basic_ostream<char> &oss, std::span<char
   }
 }
 
-inline void FormatHexToStream(std::basic_ostream<char> &oss, std::span<char> buff) {
+inline void FormatHexToStream(std::basic_ostream<char> &oss, std::span<const char> buff) {
   for (char c: buff) {
     oss << fmt::format("{:02x}", (unsigned char) c);
   }
 }
 
-inline std::ostringstream FormatHexToStream(std::span<char> buff) {
+inline std::ostringstream FormatHexToStream(std::span<const char> buff) {
   std::ostringstream oss{};
   FormatHexToStream(oss, buff);
   return oss;
+}
+
+inline std::ostringstream FormatHexToStream(std::span<const uint8_t> buff) {
+  return FormatHexToStream(std::span<const char>(reinterpret_cast<const char *>(buff.data()), buff.size()));
 }
 
 #endif // MYEXTENSION_UTILS_H

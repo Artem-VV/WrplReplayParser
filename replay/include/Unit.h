@@ -159,6 +159,7 @@ namespace unit {
     std::string launcher{}; ///< gun this line is for, by weapon_name; empty on ground, where the gun is the only one
     std::string bullet{}; ///< BulletSet::name of the shell or belt taken
     uint16_t count;
+    uint8_t unk;
   };
 
   /// One thing a loadout can put in a gun: a shell, or a belt of them.

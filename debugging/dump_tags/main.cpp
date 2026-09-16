@@ -6,10 +6,10 @@ std::unordered_set<std::string> all_tags;
 int main() {
   std::string p1 = R"(D:\SteamLibrary\steamapps\common\War Thunder\cache\binary.2.49.0\char.vromfs.bin)";
 
-  EXCEPTION_IF_FALSE(file_mgr.mountVromfs(p1), "Ah shit");
+  G_CHECKF(file_mgr.mountVromfs(p1), "Ah shit");
 
   SharedPtr<DataBlock> blk = SharedPtr<DataBlock>::make();
-  EXCEPTION_IF_FALSE(load(*blk.get(), "config/unittags.blk"), "failed to load blk");
+  G_CHECKF(load(*blk.get(), "config/unittags.blk"), "failed to load blk");
   for (int i = 0; i < blk->blockCount(); i++) {
     auto unit_blk = blk->getBlock(i);
     auto tags_blk = unit_blk->getBlock("tags", 0);

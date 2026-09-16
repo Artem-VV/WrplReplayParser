@@ -3,6 +3,7 @@
 #include <cassert>
 #include "consts.h"
 #include "utils.h"
+#include "math/dag_bits.h"
 
 
 void writeSize(BitStream &to, uint32_t size_in_bits) {
@@ -115,7 +116,7 @@ uint32_t IdFieldSerializer32::readFieldsSizeAndFlag(const BitStream &from) {
   from.ReadCompressed(fields);
   BitSize_t startBody = from.GetReadOffset();
   from.SetReadOffset(BYTES_TO_BITS(offset) + start);
-  currRdSz = static_cast<uint8_t>(popcount(fields));
+  currRdSz = static_cast<uint8_t>(__popcount(fields));
 
   G_ASSERT(currRdSz);
   for (uint8_t j = 0; j < currRdSz; ++j) {

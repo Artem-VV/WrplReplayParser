@@ -99,6 +99,16 @@ void PyCodegenTypes::include(py::module_ &m) {
     .def_readonly("v1", &danet::DamagedState::v1)
     .def_readonly("v2", &danet::DamagedState::v2)
     ;
+  py::class_<danet::dummyForSupportPlanes>(mpi, "dummyForSupportPlanes")
+    .def_readonly("eid1", &danet::dummyForSupportPlanes::eid1)
+    .def_readonly("eid1_list", &danet::dummyForSupportPlanes::eid1_list)
+    .def_readonly("eid2", &danet::dummyForSupportPlanes::eid2)
+    .def_readonly("eid2_list", &danet::dummyForSupportPlanes::eid2_list)
+    .def_readonly("eid3", &danet::dummyForSupportPlanes::eid3)
+    .def_readonly("eid3_list", &danet::dummyForSupportPlanes::eid3_list)
+    .def_readonly("eid4", &danet::dummyForSupportPlanes::eid4)
+    .def_readonly("eid4_list", &danet::dummyForSupportPlanes::eid4_list)
+    ;
   bind_readonly_vector<std::vector<uint32_t>>(gen, "std_vector_uint32_t_");
 
   bind_readonly_vector<std::vector<danet::Crew>>(gen, "std_vector_danet_Crew_");
@@ -108,8 +118,6 @@ void PyCodegenTypes::include(py::module_ &m) {
   bind_readonly_vector<std::vector<danet::zigZagPair>>(gen, "std_vector_danet_zigZagPair_");
 
   bind_readonly_vector<std::vector<danet::WeatherEffect>>(gen, "std_vector_danet_WeatherEffect_");
-
-  bind_array<ecs::EntityId, 20>(mpi, "std_array_ecs_EntityId_20_");
 
   bind_readonly_vector<std::vector<uint8_t>>(gen, "std_vector_uint8_t_");
 

@@ -21,7 +21,7 @@ class MPlayer(ReflectableObject):
     memberId = Var("uint16_t", 11)
     customState = Var("DataBlock", 12)
     score = Var("uint16_t", 13)
-    dummyForSupportPlanes = Var("std::array<ecs::EntityId, 20>", 14)  # TODO, define custom type?
+    dummyForSupportPlanes = Var("danet::dummyForSupportPlanes", 14)  # TODO, define custom type?
     dummyForCrewUnitsList = Var("danet::CrewUnitsList", 15)
     disabledByMatchingSlots = Var("uint32_t", 16)
     brokenSlots = Var("uint32_t", 17)
