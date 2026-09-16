@@ -135,12 +135,12 @@ namespace unit {
                                            {0xf, "special gun"},
                                            {0x10, "smoke"}}};
 
+  constexpr int GUNNER_WEAPON_ID_BASE = 0x13;
+
   std::string get_weapon_class(int weapon_id) {
-    // gunnerN wins over the table above 0x10: the two overlap at 0x12, where the game
-    // itself spells both targetingPod and gunner1, and every id above 0x10 seen in a
-    // replay so far has been a gunner mount.
-    if (weapon_id >= 0x11)
-      return fmt::format("gunner{}", weapon_id - 0x11);
+    // 0x12 is targetingPod; the game's ground-weapon range starts after it.
+    if (weapon_id >= GUNNER_WEAPON_ID_BASE)
+      return fmt::format("gunner{}", weapon_id - GUNNER_WEAPON_ID_BASE);
     for (auto &[id, name]: weapon_id_match) {
       if (id == weapon_id)
         return name;
@@ -158,7 +158,7 @@ namespace unit {
     } else if (weapon_name == "torpedoes") {
       return 6;
     } else if (strncmp(weapon_name.data(), "gunner", 6) == 0 && weapon_name.length() >= 7) {
-      return atoi(weapon_name.data() + 6) + 0x11;
+      return atoi(weapon_name.data() + 6) + GUNNER_WEAPON_ID_BASE;
     }
     return -1;
   }
@@ -638,9 +638,9 @@ namespace unit {
     // launcher, its emitter and its turret are the same whichever slot fired. What
     // differs is the munition, and that is named by the battle report, not here.
     // Only for the ids the server actually uses for such a slot: those are gunner
-    // mounts, 0x11 and up. A miss on a lower id is a miss on a hull weapon and gets
+    // mounts, 0x13 and up. A miss on a lower id is a miss on a hull weapon and gets
     // no answer rather than a wrong one.
-    if (id >= 0x11) {
+    if (id >= GUNNER_WEAPON_ID_BASE) {
       for (auto &w: this->weapons) {
         if (w.from_pilon)
           return &w;
