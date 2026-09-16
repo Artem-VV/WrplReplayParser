@@ -43,10 +43,10 @@ void include_types_2(py::module &gen) {
   bind_readonly_vector<dag::Vector<danet::ReflectionVar<danet::dummyForSupportPlanes>::TimeState>>(gen, "danet_dummyForSupportPlanes_ts_vector");
 
   bind_reflection_var<danet::dummyForSupportPlanes>(gen, "danet_dummyForSupportPlanes_var");
-  //danet::ReflectionVar<float> bindings
-  bind_time_state<float>(gen, "float_ts");
-  bind_readonly_vector<dag::Vector<danet::ReflectionVar<float>::TimeState>>(gen, "float_ts_vector");
+  //danet::ReflectionVar<danet::CrewUnitsList> bindings
+  bind_time_state<danet::CrewUnitsList>(gen, "danet_CrewUnitsList_ts");
+  bind_readonly_vector<dag::Vector<danet::ReflectionVar<danet::CrewUnitsList>::TimeState>>(gen, "danet_CrewUnitsList_ts_vector");
 
-  bind_reflection_var<float>(gen, "float_var");
+  bind_reflection_var<danet::CrewUnitsList>(gen, "danet_CrewUnitsList_var");
   include_types_3(gen);
 }
