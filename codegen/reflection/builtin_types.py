@@ -80,9 +80,19 @@ class vector_reg(DataTypeRegister):
 
     @staticmethod
     def serialize_name(datatype: 'DataTypeCompiled'):
-        base = datatype.datatype.reg.name
-        return f"{base}<{str(datatype.template_args[0])}>"  # the second arg is only for code generation
+        return f"std::vector<{str(datatype.template_args[0])}>"  # the second arg is only for code generation
 
+
+class compressed_vector_reg(DataTypeRegister):
+    name = "std::compressed_vector"
+    # second DataTypeType is the type of the value holding our size, most often u8, but can be u32
+    template_type_args = [DataTypeType, DataTypeType]
+    custom_loader = compressed_vector_loader
+    custom_writer = compressed_vector_writer
+
+    @staticmethod
+    def serialize_name(datatype: 'DataTypeCompiled'):
+        return f"std::vector<{str(datatype.template_args[0])}>"  # the second arg is only for code generation
 
 class zigZagInt_reg(DataTypeRegister):
     name = "danet::zigZagInt"

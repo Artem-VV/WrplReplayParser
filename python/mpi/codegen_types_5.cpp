@@ -8,6 +8,11 @@
 #include "pybind11/stl_bind.h"
 void include_types_6(py::module &gen);
 void include_types_5(py::module &gen) {
+  //danet::ReflectionVar<std::vector<danet::UnitIdStruct>> bindings
+  bind_time_state<std::vector<danet::UnitIdStruct>>(gen, "std_vector_danet_UnitIdStruct__ts");
+  bind_readonly_vector<dag::Vector<danet::ReflectionVar<std::vector<danet::UnitIdStruct>>::TimeState>>(gen, "std_vector_danet_UnitIdStruct__ts_vector");
+
+  bind_reflection_var<std::vector<danet::UnitIdStruct>>(gen, "std_vector_danet_UnitIdStruct__var");
   //danet::ReflectionVar<std::array<std::string,2>> bindings
   bind_time_state<std::array<std::string,2>>(gen, "std_array_std_string_2__ts");
   bind_readonly_vector<dag::Vector<danet::ReflectionVar<std::array<std::string,2>>::TimeState>>(gen, "std_array_std_string_2__ts_vector");

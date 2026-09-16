@@ -89,19 +89,61 @@ namespace danet {
     return false;
   }
 
-  int ecsEntityId_20arrayCoder(DANET_ENCODER_SIGNATURE) {
+  int dummyForSupportPlanesCoder(DANET_ENCODER_SIGNATURE) {
     ZoneScoped;
-    auto data = meta->getValue<std::array<ecs::EntityId,20>>();
+    auto data = meta->getValue<danet::dummyForSupportPlanes>();
     if (op == DANET_REFLECTION_OP_ENCODE) {
-      for(auto & v : *(data)) {
+      net::write_eid(*bs, data->eid1);
+      bs->WriteCompressed((uint32_t)data->eid1_list.size());
+      for(auto & v : data->eid1_list) {
+        net::write_eid(*bs, v);
+      }
+      net::write_eid(*bs, data->eid2);
+      bs->WriteCompressed((uint32_t)data->eid2_list.size());
+      for(auto & v : data->eid2_list) {
+        net::write_eid(*bs, v);
+      }
+      net::write_eid(*bs, data->eid3);
+      bs->WriteCompressed((uint32_t)data->eid3_list.size());
+      for(auto & v : data->eid3_list) {
+        net::write_eid(*bs, v);
+      }
+      net::write_eid(*bs, data->eid4);
+      bs->WriteCompressed((uint32_t)data->eid4_list.size());
+      for(auto & v : data->eid4_list) {
         net::write_eid(*bs, v);
       }
       return true;
     }
     else if (op == DANET_REFLECTION_OP_DECODE) {
-      for(auto & v : *(data)) {
+      REPL_VER(net::read_eid(*bs, data->eid1));
+      {uint32_t sz;
+      REPL_VER(bs->ReadCompressed(sz));
+      data->eid1_list.resize(sz);
+      for(auto & v : data->eid1_list) {
         REPL_VER(net::read_eid(*bs, v));
-      }
+      }}
+      REPL_VER(net::read_eid(*bs, data->eid2));
+      {uint32_t sz;
+      REPL_VER(bs->ReadCompressed(sz));
+      data->eid2_list.resize(sz);
+      for(auto & v : data->eid2_list) {
+        REPL_VER(net::read_eid(*bs, v));
+      }}
+      REPL_VER(net::read_eid(*bs, data->eid3));
+      {uint32_t sz;
+      REPL_VER(bs->ReadCompressed(sz));
+      data->eid3_list.resize(sz);
+      for(auto & v : data->eid3_list) {
+        REPL_VER(net::read_eid(*bs, v));
+      }}
+      REPL_VER(net::read_eid(*bs, data->eid4));
+      {uint32_t sz;
+      REPL_VER(bs->ReadCompressed(sz));
+      data->eid4_list.resize(sz);
+      for(auto & v : data->eid4_list) {
+        REPL_VER(net::read_eid(*bs, v));
+      }}
       return true;
     }
     return false;
@@ -121,7 +163,7 @@ namespace danet {
       return true;
     }
     else if (op == DANET_REFLECTION_OP_DECODE) {
-      uint8_t sz;
+      {uint8_t sz;
       REPL_VER(bs->Read(sz));
       data->crew.resize(sz);
       for(auto & v : data->crew) {
@@ -129,7 +171,7 @@ namespace danet {
         REPL_VER(net::read_eid(*bs, v.e2));
         REPL_VER(bs->Read(v.v1));
         REPL_VER(bs->Read(v.v2));
-      }
+      }}
       return true;
     }
     return false;
@@ -188,12 +230,12 @@ namespace danet {
       return true;
     }
     else if (op == DANET_REFLECTION_OP_DECODE) {
-      uint8_t sz;
+      {uint8_t sz;
       REPL_VER(bs->Read(sz));
       data->resize(sz);
       for(auto & v : *(data)) {
         REPL_VER(bs->Read(v));
-      }
+      }}
       return true;
     }
     return false;
@@ -210,12 +252,12 @@ namespace danet {
       return true;
     }
     else if (op == DANET_REFLECTION_OP_DECODE) {
-      uint8_t sz;
+      {uint8_t sz;
       REPL_VER(bs->Read(sz));
       data->resize(sz);
       for(auto & v : *(data)) {
         REPL_VER(bs->Read(v));
-      }
+      }}
       return true;
     }
     return false;
@@ -232,12 +274,12 @@ namespace danet {
       return true;
     }
     else if (op == DANET_REFLECTION_OP_DECODE) {
-      uint8_t sz;
+      {uint8_t sz;
       REPL_VER(bs->Read(sz));
       data->resize(sz);
       for(auto & v : *(data)) {
         REPL_VER(bs->Read(v));
-      }
+      }}
       return true;
     }
     return false;
@@ -256,14 +298,14 @@ namespace danet {
       return true;
     }
     else if (op == DANET_REFLECTION_OP_DECODE) {
-      uint8_t sz;
+      {uint8_t sz;
       REPL_VER(bs->Read(sz));
       data->vals.resize(sz);
       for(auto & v : data->vals) {
         REPL_VER(bs->Read(v.v1));
         REPL_VER(bs->Read(v.v2));
         REPL_VER(bs->Read(v.v3));
-      }
+      }}
       return true;
     }
     return false;
@@ -282,12 +324,12 @@ namespace danet {
     }
     else if (op == DANET_REFLECTION_OP_DECODE) {
       REPL_VER(bs->Read(data->combined));
-      uint8_t sz;
+      {uint8_t sz;
       REPL_VER(bs->Read(sz));
       data->scores.resize(sz);
       for(auto & v : data->scores) {
         REPL_VER(bs->Read(v));
-      }
+      }}
       return true;
     }
     return false;
@@ -437,13 +479,13 @@ namespace danet {
       return true;
     }
     else if (op == DANET_REFLECTION_OP_DECODE) {
-      uint32_t sz;
+      {uint32_t sz;
       REPL_VER(bs->Read(sz));
       data->effects.resize(sz);
       for(auto & v : data->effects) {
         REPL_VER(bs->Read(v.name));
         REPL_VER(bs->Read(v.effect_data));
-      }
+      }}
       return true;
     }
     return false;
@@ -502,12 +544,12 @@ namespace danet {
       return true;
     }
     else if (op == DANET_REFLECTION_OP_DECODE) {
-      uint8_t sz;
+      {uint8_t sz;
       REPL_VER(bs->Read(sz));
       data->resize(sz);
       for(auto & v : *(data)) {
         REPL_VER(bs->ReadBits((uint8_t*)&v, 0xb));
-      }
+      }}
       return true;
     }
     return false;
@@ -525,13 +567,13 @@ namespace danet {
       return true;
     }
     else if (op == DANET_REFLECTION_OP_DECODE) {
-      uint8_t sz;
+      {uint8_t sz;
       REPL_VER(bs->Read(sz));
       data->resize(sz);
       for(auto & v : *(data)) {
         REPL_VER(bs->ReadBits((uint8_t*)&v.uid, 0xb));
         REPL_VER(bs->Read(v.thang));
-      }
+      }}
       return true;
     }
     return false;
