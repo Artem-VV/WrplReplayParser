@@ -65,6 +65,8 @@ namespace translate {
   translate_index_t translate_table_t::get_key(std::string_view string) {
     if (string.empty())
       return INVALID_TRANSLATE_INDEX;
+    if (hashToIndex.empty())
+      return INVALID_TRANSLATE_INDEX;
     auto hash = hash_method(string);
     return hashToIndex.findOr(hash, INVALID_TRANSLATE_INDEX);
   }
@@ -195,7 +197,9 @@ namespace translate {
 
   translate_index_t translate_table_t::addKey(std::string_view key) {
     auto hash = hash_method(key);
-    auto idx = hashToIndex.findOr(hash, INVALID_TRANSLATE_INDEX);
+    auto idx = INVALID_TRANSLATE_INDEX;
+    if (!hashToIndex.empty())
+      idx = hashToIndex.findOr(hash, INVALID_TRANSLATE_INDEX);
     if (idx != INVALID_TRANSLATE_INDEX)
       EXCEPTION("key {} already exists", key);
     idx = indexToOffs.size();

@@ -9,7 +9,7 @@ class MPlayer(ReflectableObject):
         SVar("std::unordered_set<unit::Unit*>", "currentOwnedUnits"),
         SVar("std::vector<unit::Unit*>", "allOwnedUnits")
     ]
-    uid = Var("danet::Uid", 2)
+    uid = Var("danet::Uid", 2, "UidCoder")
     invitedNickName = Var("std::string", 3)
     nickLocKey = Var("std::string", 4, "TranslatedCoder")
     ClanTag = Var("std::string", 5)

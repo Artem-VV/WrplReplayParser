@@ -39,7 +39,7 @@ namespace unit {
       }
 
       nodes.emplace_back(i, tree->getParentNodeIdx(i));
-      DG_ASSERT(nodes.capacity() == last_size);
+      G_ASSERT(nodes.capacity() == last_size);
       name_to_idx[name] = &nodes.back();
     }
   }
@@ -233,10 +233,10 @@ namespace unit {
   }
 
   std::string getBaseWeaponBlockName(const DataBlock *blk) {
-    DG_ASSERT(strcmp(blk->getBlockName(), "Weapon") == 0);
+    G_ASSERT(strcmp(blk->getBlockName(), "Weapon") == 0);
     DataBlock temp_blk;
     auto blk_str = blk->getStr("blk", nullptr);
-    DG_ASSERT(dblk::load(temp_blk, blk_str));
+    G_ASSERT(dblk::load(temp_blk, blk_str));
     auto ret = parse_weapon_container(&temp_blk);
     return ret.empty() ? blk_str : ret;
   }
@@ -266,7 +266,7 @@ namespace unit {
     this->name_index = translate::get_locale_index(fmt::format("weapons/{}", this->weapon_name));
     this->name_index_short = translate::get_locale_index(fmt::format("weapons/{}/short", this->weapon_name));
     if (this->weapon_name != "dummy_weapon" && strcmp("boosters", trigger) != 0)
-      DG_ASSERT(this->name_index != translate::INVALID_TRANSLATE_INDEX);
+      G_ASSERT(this->name_index != translate::INVALID_TRANSLATE_INDEX);
 
     weapons_count[weapon_id]++;
     if (unit->hasTree()) {

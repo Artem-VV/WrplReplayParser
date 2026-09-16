@@ -14,10 +14,9 @@ namespace danet {
   int InvalidSerializer(DANET_ENCODER_SIGNATURE);
   int WeaponsCoder(DANET_ENCODER_SIGNATURE);
   int dummyVarForDamagedStateReflectionCoder(DANET_ENCODER_SIGNATURE);
-
-  template <>
+  int UidCoder(DANET_ENCODER_SIGNATURE);
+  template<>
   struct DefaultEncoderChooser<Invalid> {
     static constexpr reflection_var_encoder coder = InvalidSerializer;
   };
-}
-
+} // namespace danet

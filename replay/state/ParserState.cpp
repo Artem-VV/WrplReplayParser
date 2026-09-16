@@ -23,7 +23,7 @@ ParserState::ParserState(IReplay *replay) {
   initialize(header->player_count);
 }
 void ParserState::initialize(uint32_t player_count) {
-  DG_ASSERT(this->players.size() == 0);
+  G_ASSERT(this->players.size() == 0);
   this->players.reserve(player_count);
   for (size_t i = 0; i < player_count; i++) {
     this->players.emplace_back(this, (mpi::ObjectID)((0xe<<0xb)+i));

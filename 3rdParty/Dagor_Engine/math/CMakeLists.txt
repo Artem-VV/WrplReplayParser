@@ -11,10 +11,13 @@ add_library(dag_math
 add_library(DAG_MATH::DAG_MATH ALIAS dag_math)
 
 target_link_libraries(dag_math
-        mimalloc-static
         EASTL::EASTL
         LOGGER::LOGGER
 )
+
+if(NOT EMSCRIPTEN)
+    target_link_libraries(dag_math mimalloc-static)
+endif ()
 
 set(INCLUDES
 

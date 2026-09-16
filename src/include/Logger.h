@@ -3,6 +3,7 @@
 #ifndef LOGGER_LOGGER_H
 #define LOGGER_LOGGER_H
 
+#include "cpptrace_compat.h"
 #include <condition_variable>
 #include <fstream>
 #include <unordered_map>
@@ -160,8 +161,6 @@ class logger_sink {
   }
 
   void flush(bool flush_con = false) {
-    if (flush_con && this->print_to_console)
-      std::cout.flush();
     if (this->f_sync)
       this->f_sync->flush();
   }

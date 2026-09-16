@@ -22,6 +22,8 @@ public:
     new (obj) T(std::forward<Args>(args)...);
   }
 
+  bool init_state() { return initialized; }
+
   ~OnDemandInit() {
     ZoneScoped;
     if (initialized)
@@ -30,7 +32,7 @@ public:
 
 private:
   T *getPtr() const {
-    DG_ASSERT(initialized == true);
+    G_ASSERT(initialized == true);
     return (T *) &obj;
   }
   alignas(T) mutable uint8_t obj[sizeof(T)];

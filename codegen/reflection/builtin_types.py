@@ -37,6 +37,11 @@ class uint64_t_reg(DataTypeRegister):
     is_pod = True
 
 
+class int64_t_reg(DataTypeRegister):
+    name = "int64_t"
+    is_pod = True
+
+
 class int_reg(DataTypeRegister):
     name = "int"
     is_pod = True
@@ -88,7 +93,6 @@ class compressed_vector_reg(DataTypeRegister):
     @staticmethod
     def serialize_name(datatype: 'DataTypeCompiled'):
         return f"std::vector<{str(datatype.template_args[0])}>"  # the second arg is only for code generation
-
 
 class zigZagInt_reg(DataTypeRegister):
     name = "danet::zigZagInt"

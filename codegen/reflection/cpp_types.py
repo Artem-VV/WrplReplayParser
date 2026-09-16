@@ -165,7 +165,7 @@ class dummyForDeathInfo_reg(DataTypeRegister):
 class KillerStruct_reg(DataTypeRegister):
     name = "danet::KillerStruct"
     members = [
-        "uint64_t player_id;",  # the player account's id
+        "int64_t player_id;",  # the player account's id
         "uint16_t uid;",  # unit uid
         "std::string vehicle;"
     ]

@@ -5,20 +5,6 @@
 #include "state/ParserState.h"
 namespace danet {
 
-  int UidCoder(DANET_ENCODER_SIGNATURE) {
-    ZoneScoped;
-    auto data = meta->getValue<danet::Uid>();
-    if (op == DANET_REFLECTION_OP_ENCODE) {
-      bs->Write(*(data));
-      return true;
-    }
-    else if (op == DANET_REFLECTION_OP_DECODE) {
-      REPL_VER(bs->Read(*(data)));
-      return true;
-    }
-    return false;
-  }
-
   int stringCoder(DANET_ENCODER_SIGNATURE) {
     ZoneScoped;
     auto data = meta->getValue<std::string>();

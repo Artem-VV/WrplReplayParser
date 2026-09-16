@@ -6,12 +6,11 @@
 #ifdef _MSC_VER
 #include <intrin.h>
 #endif
-
+#include "cpptrace_compat.h"
 #include <fmt/base.h>
 #include <cstdlib>
 #include <cstdarg> // for va_list, va_start, va_end
 #include <cstdint>
-#include <cpptrace/cpptrace.hpp>
 #include "utils.h"
 #include "tracy/Tracy.hpp"
 
@@ -38,7 +37,7 @@
 
 class AssertException : public std::runtime_error {
 public:
-  explicit AssertException(std::string msg) : std::runtime_error(std::move(msg)) {}
+  explicit AssertException(const std::string &msg) : std::runtime_error(std::move(msg)) {}
 
   const char *what() const noexcept override { return std::runtime_error::what(); }
 };
@@ -68,27 +67,20 @@ public:
 #define G_ASSERT_FAIL(fmt, ...) \
   { assert_failed(__FILE__, __LINE__, __FUNCTION__, expr_str, fmt __VA_OPT__(, ) __VA_ARGS__); }
 
-#define G_ASSERTF_ONCE(expression, fmt, ...)                                                     \
-  do {                                                                                           \
-    static bool showed_ = false;                                                                 \
-    const bool g_assert_result_ = !!(expression);                                                \
-    if (DAGOR_UNLIKELY(!g_assert_result_) && !showed_) {                                         \
-      assert_failed(__FILE__, __LINE__, __FUNCTION__, expr_str, fmt __VA_OPT__(, ) __VA_ARGS__); \
-      showed_ = true;                                                                            \
-    }                                                                                            \
-  } while (0)
-
-#define G_ASSERT(expression)            G_ASSERT_EX(expression, #expression)
-#define G_ASSERTF(expression, fmt, ...) G_ASSERTF_EX(expression, #expression, fmt __VA_OPT__(, ) __VA_ARGS__)
 
 #if LDAG_DBGLEVEL > 0
-#define DG_ASSERT(expression)            G_ASSERT_EX(expression, #expression)
-#define DG_ASSERTF(expression, fmt, ...) G_ASSERTF_EX(expression, #expression, fmt __VA_OPT__(, ) __VA_ARGS__)
+#define G_ASSERT(expression)            G_ASSERT_EX(expression, #expression)
+#define G_ASSERTF(expression, fmt, ...) G_ASSERTF_EX(expression, #expression, fmt __VA_OPT__(, ) __VA_ARGS__)
 #else
-#define DG_ASSERT(expression)            ((void) (expression))
-#define DG_ASSERTF(expression, fmt, ...) ((void) (expression))
+#define G_ASSERT(expression)            ((void) (expression))
+#define G_ASSERTF(expression, fmt, ...) ((void) (expression))
 #endif
 
+#define G_CHECK(expression) G_ASSERTF_EX(expression, #expression, "CHECK FAILED")
+#define G_CHECKF(expression, fmt, ...) \
+  G_ASSERTF_EX(expression, #expression, "CHECK FAILED" fmt __VA_OPT__(, ) __VA_ARGS__)
+
+#define G_CHECK_EQ(a, b) G_CHECKF((a) == (b), "CHECK_EQ FAILED: {} != {}", a, b)
 
 // This assertion API is faster because it's won't do any function calls within, therefore not translating
 // functions that call it in non-leaf functions (and preventing optimizer to inline it for example)
@@ -96,25 +88,19 @@ public:
 // Downside of it - no pretty message box with message when something gone wrong (only standard Unhandled
 // exception/Segfault one) It's programmer's job to choose wisely which one to use for each specific case (but generally
 // it's better to stick to G_ASSERT)
-#define DAGOR_DBGLEVEL 2
-#if DAGOR_DBGLEVEL > 1
+
+// this is dagor, I dont feel like adding the weird int3 instruction stuff right now (and making it work with stuff like
+// WASM)
 #define G_FAST_ASSERT G_ASSERT
-#else
-#define G_FAST_ASSERT(expr)      \
-  do {                           \
-    if (DAGOR_UNLIKELY(!(expr))) \
-      G_DEBUG_BREAK_FORCED;      \
-  } while (0)
-#endif
 
 // _LOG functions check the condition and produce error messages even
 // in production builds, which allows them to be reported. Use with care,
 // bandwidth costs money!
-#if DAGOR_DBGLEVEL < 1
+#if LDAG_DBGLEVEL < 1
 #define G_ASSERT_LOG(expression, ...)  \
   do {                                 \
     if (DAGOR_UNLIKELY(!(expression))) \
-      logerr(__VA_ARGS__);             \
+      LOGE(__VA_ARGS__);               \
   } while (0)
 // Does and action before logging. Useful for providing additional
 // context about what went worng.
@@ -122,7 +108,7 @@ public:
   do {                                               \
     if (DAGOR_UNLIKELY(!(expression))) {             \
       action;                                        \
-      logerr(__VA_ARGS__);                           \
+      LOGE(__VA_ARGS__);                             \
     }                                                \
   } while (0)
 #else
@@ -136,7 +122,7 @@ public:
   } while (0)
 #endif
 
-#if DAGOR_DBGLEVEL < 1
+#if LDAG_DBGLEVEL < 1
 #define G_VERIFY(expression) \
   do {                       \
     (void) (expression);     \
@@ -185,7 +171,6 @@ public:
     if (DAGOR_UNLIKELY(!g_assert_result_do_))                                 \
       cmd;                                                                    \
   }
-
 #define G_ASSERT_AND_DO(expr, cmd)        \
   do                                      \
     G_ASSERT_AND_DO_UNHYGIENIC(expr, cmd) \
@@ -196,7 +181,7 @@ public:
     G_ASSERTF_AND_DO_UNHYGIENIC(expr, cmd, fmt __VA_OPT__(, ) __VA_ARGS__) \
   while (0)
 
-#define G_ASSERT_RETURN(expr, returnValue) G_ASSERT_AND_DO(expr, return returnValue)
+#define G_ASSERT_RETURN(expr, returnValue) G_ASSERT_AND_DO(expr, return returnValue;)
 #define G_ASSERT_BREAK(expr)               G_ASSERT_AND_DO_UNHYGIENIC(expr, break)
 #define G_ASSERT_CONTINUE(expr)            G_ASSERT_AND_DO_UNHYGIENIC(expr, continue)
 
@@ -205,13 +190,13 @@ public:
 #define G_ASSERTF_BREAK(expr, fmt, ...)    G_ASSERTF_AND_DO_UNHYGIENIC(expr, break, fmt __VA_OPT__(, ) __VA_ARGS__)
 #define G_ASSERTF_CONTINUE(expr, fmt, ...) G_ASSERTF_AND_DO_UNHYGIENIC(expr, continue, fmt __VA_OPT__(, ) __VA_ARGS__)
 
-#if DAGOR_DBGLEVEL > 0
+#if LDAG_DBGLEVEL > 0
 #define G_DEBUG_BREAK G_DEBUG_BREAK_FORCED
 #else
 #define G_DEBUG_BREAK ((void) 0)
 #endif
 
-#undef DAGOR_DBGLEVEL
+#undef LDAG_DBGLEVEL
 
 #define G_LOGERR_AND_DO(expression, action, ...) \
   if (DAGOR_UNLIKELY(!(expression))) {           \

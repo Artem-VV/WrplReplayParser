@@ -274,7 +274,6 @@ public:
     for (rd = rd_part; rd_part && rd < size; rd += rd_part)
       rd_part = tryRead(rd + (char *) ptr, size - rd);
 
-    // G_ASSERTF(rd == size, "{}: readExact({},{})={}", getTargetName(), ptr, size, rd);
     return rd == size;
   }
 
@@ -339,14 +338,14 @@ public:
 
   inline void skipString() {
     int len = readInt();
-    EXCEPTION_IF_FALSE(seekrel(len), "");
+    seekrel(len);
     alignOnDword(len);
   }
 
   inline void skipShortString() {
     unsigned short len = 0;
     read(&len, sizeof(len));
-    EXCEPTION_IF_FALSE(seekrel(len), "");
+    seekrel(len);
   }
 
   inline void gets(char *s, int n) {
@@ -383,7 +382,7 @@ public:
     int elemsz = readInt();
     if (elemsz != elem_size(tab)) {
       tab.resize(0);
-      EXCEPTION_IF_FALSE(seekrel(elemsz * readInt()), "");
+      seekrel(elemsz * readInt());
       return false;
     }
     readTab(tab);
@@ -393,7 +392,7 @@ public:
   inline void alignOnDword(int len) {
     // alignment! all strings are aligned on 4 bytes boundary
     if (len & 3)
-      EXCEPTION_IF_FALSE(seekrel(4 - (len & 3)), "");
+      seekrel(4 - (len & 3));
   }
 };
 

@@ -29,21 +29,21 @@ int main() {
   fs::path p12 = war_dir / R"(tex.vromfs.bin)";
   fs::path p13 = war_dir / R"(regional.vromfs.bin)";*/
 
-  EXCEPTION_IF_FALSE(file_mgr.mountVromfs(p1), "Ah shit");
-  //EXCEPTION_IF_FALSE(file_mgr.loadVromfs(p2), "Ah shit");
-  //EXCEPTION_IF_FALSE(file_mgr.loadVromfs(p3), "Ah shit");
-  //EXCEPTION_IF_FALSE(file_mgr.loadVromfs(p4), "Ah shit");
-  //EXCEPTION_IF_FALSE(file_mgr.loadVromfs(p5), "Ah shit");
-  //EXCEPTION_IF_FALSE(file_mgr.loadVromfs(p55), "Ah shit");
-  //EXCEPTION_IF_FALSE(file_mgr.loadVromfs(p6), "Ah shit");
-  //EXCEPTION_IF_FALSE(file_mgr.loadVromfs(p7), "Ah shit");
-  //EXCEPTION_IF_FALSE(file_mgr.loadVromfs(p8), "Ah shit");
-  //EXCEPTION_IF_FALSE(file_mgr.loadVromfs(p9), "Ah shit");
-  //EXCEPTION_IF_FALSE(file_mgr.loadVromfs(p10), "Ah shit");
-  //EXCEPTION_IF_FALSE(file_mgr.loadVromfs(p11), "Ah shit");
-  //EXCEPTION_IF_FALSE(file_mgr.loadVromfs(p12), "Ah shit");
-  //EXCEPTION_IF_FALSE(file_mgr.loadVromfs(p13), "Ah shit");
-  //EXCEPTION_IF_FALSE(file_mgr.loadVromfs(p14), "Ah shit");
+  G_CHECKF(file_mgr.mountVromfs(p1), "Ah shit");
+  //G_CHECKF(file_mgr.loadVromfs(p2), "Ah shit");
+  //G_CHECKF(file_mgr.loadVromfs(p3), "Ah shit");
+  //G_CHECKF(file_mgr.loadVromfs(p4), "Ah shit");
+  //G_CHECKF(file_mgr.loadVromfs(p5), "Ah shit");
+  //G_CHECKF(file_mgr.loadVromfs(p55), "Ah shit");
+  //G_CHECKF(file_mgr.loadVromfs(p6), "Ah shit");
+  //G_CHECKF(file_mgr.loadVromfs(p7), "Ah shit");
+  //G_CHECKF(file_mgr.loadVromfs(p8), "Ah shit");
+  //G_CHECKF(file_mgr.loadVromfs(p9), "Ah shit");
+  //G_CHECKF(file_mgr.loadVromfs(p10), "Ah shit");
+  //G_CHECKF(file_mgr.loadVromfs(p11), "Ah shit");
+  //G_CHECKF(file_mgr.loadVromfs(p12), "Ah shit");
+  //G_CHECKF(file_mgr.loadVromfs(p13), "Ah shit");
+  //G_CHECKF(file_mgr.loadVromfs(p14), "Ah shit");
   auto dir = file_mgr.getDir();
 
   //auto file = (*dir)["config"]["network.blk"];

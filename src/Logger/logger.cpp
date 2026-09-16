@@ -3,6 +3,9 @@
 #include "thread"
 #include "ioSys/dag_dataBlock.h"
 #include <chrono>
+#if defined(__EMSCRIPTEN__)
+#include <emscripten.h>
+#endif
 OnDemandInit<log_handler> g_log_handler;
 LoggerSinkRegister *LoggerSinkRegister::tail = nullptr;
 
@@ -57,6 +60,9 @@ void assert_failed_ext(const char *file, int line, const char *function, const c
   LOGE("{}", stackTrace);
   g_log_handler->wait_until_empty();
   g_log_handler->flush_all();
+#if defined(__EMSCRIPTEN__)
+  emscripten_force_exit(EXIT_FAILURE);
+#endif
 #if LDAG_DBGLEVEL == 0
   if (!message.empty()) {
     throw AssertException(fmt::format("ASSERTION FAILED:\n {}:{}\nFunction: {} \nExpression: {} \nMessage: {}\n{}",
@@ -79,13 +85,18 @@ void fatal(const char *file, int line, const char *function, std::string message
   LOGE("{}", trace);
   g_log_handler->wait_until_empty();
   g_log_handler->flush_all();
-  throw ExceptionException(
-    fmt::format("Fatal error at {}:{}\nFunction: {} \nMessage: {}\n{}", file, line, function, message, trace));
+  #if defined(__EMSCRIPTEN__)
+     emscripten_force_exit(EXIT_FAILURE);
+   #endif
+#if LDAG_DBGLEVEL == 0
+    throw ExceptionException(
+      fmt::format("Fatal error at {}:{}\nFunction: {} \nMessage: {}\n{}", file, line, function, message, trace));
+#endif
   std::exit(EXIT_FAILURE);
 }
-
-#include <cpptrace/cpptrace.hpp>
-#ifdef WIN32
+#if defined(__EMSCRIPTEN__)
+void register_default_sigsev_handler() {}
+#elif defined(WIN32)
 #include <windows.h>
 #ifdef _MSC_VER
 #include <io.h>
