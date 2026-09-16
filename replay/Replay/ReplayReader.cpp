@@ -164,7 +164,7 @@ FullDecompressReplayReader::FullDecompressReplayReader(Replay &replay, double ex
 CompressedReplayReader::CompressedReplayReader(Replay &replay, IGenLoad *base_reader, size_t in_size,
                                                bool acquired_lock) :
   IReplayReader(replay),
-  reader(*base_reader, std::abs((int) in_size), false, false),
+  reader(*base_reader, std::abs((int) in_size), nullptr, false),
   base_reader(base_reader),
   acquired_lock(acquired_lock) {}
 
