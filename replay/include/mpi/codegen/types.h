@@ -118,4 +118,16 @@ BOOST_DESCRIBE_STRUCT(KillerStruct, (), (player_id, uid, vehicle))
     bool operator==(const DamagedState& other) const = default;
   };
 BOOST_DESCRIBE_STRUCT(DamagedState, (), (v1, v2))
+  struct dummyForSupportPlanes {
+    ecs::EntityId eid1{};
+    std::vector<ecs::EntityId> eid1_list{};
+    ecs::EntityId eid2{};
+    std::vector<ecs::EntityId> eid2_list{};
+    ecs::EntityId eid3{};
+    std::vector<ecs::EntityId> eid3_list{};
+    ecs::EntityId eid4{};
+    std::vector<ecs::EntityId> eid4_list{};
+    bool operator==(const dummyForSupportPlanes& other) const = default;
+  };
+BOOST_DESCRIBE_STRUCT(dummyForSupportPlanes, (), (eid1, eid1_list, eid2, eid2_list, eid3, eid3_list, eid4, eid4_list))
 }

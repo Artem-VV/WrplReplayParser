@@ -8,6 +8,11 @@
 #include "pybind11/stl_bind.h"
 void include_types_4(py::module &gen);
 void include_types_3(py::module &gen) {
+  //danet::ReflectionVar<danet::CrewUnitsList> bindings
+  bind_time_state<danet::CrewUnitsList>(gen, "danet_CrewUnitsList_ts");
+  bind_readonly_vector<dag::Vector<danet::ReflectionVar<danet::CrewUnitsList>::TimeState>>(gen, "danet_CrewUnitsList_ts_vector");
+
+  bind_reflection_var<danet::CrewUnitsList>(gen, "danet_CrewUnitsList_var");
   //danet::ReflectionVar<float> bindings
   bind_time_state<float>(gen, "float_ts");
   bind_readonly_vector<dag::Vector<danet::ReflectionVar<float>::TimeState>>(gen, "float_ts_vector");
@@ -43,10 +48,5 @@ void include_types_3(py::module &gen) {
   bind_readonly_vector<dag::Vector<danet::ReflectionVar<danet::dummyForFootballStat>::TimeState>>(gen, "danet_dummyForFootballStat_ts_vector");
 
   bind_reflection_var<danet::dummyForFootballStat>(gen, "danet_dummyForFootballStat_var");
-  //danet::ReflectionVar<Point3> bindings
-  bind_time_state<Point3>(gen, "Point3_ts");
-  bind_readonly_vector<dag::Vector<danet::ReflectionVar<Point3>::TimeState>>(gen, "Point3_ts_vector");
-
-  bind_reflection_var<Point3>(gen, "Point3_var");
   include_types_4(gen);
 }
