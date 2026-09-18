@@ -2,6 +2,7 @@
 #include "ReplayStructs.h"
 #include "ioSys/dag_io.h"
 #include "ioSys/dag_zlibIo.h"
+#include "ioSys/dag_zstdIo.h"
 
 
 uint32_t getPacketSize(IGenLoad &cb);
@@ -38,8 +39,9 @@ public:
 };
 
 class CompressedReplayReader : public IReplayReader {
-  ZlibLoadCB reader; // reads data from the base reader to stream decompress.  much more memory efficient compared to
-                     // FullDecompress, but much slower
+  ZstdLoadCB reader;
+  // reads data from the base reader to stream decompress.  much more memory efficient compared to
+  // FullDecompress, but much slower
   IGenLoad *base_reader;
   uint32_t curr_time = 0;
   bool acquired_lock = false;

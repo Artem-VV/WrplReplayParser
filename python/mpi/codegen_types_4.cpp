@@ -8,6 +8,11 @@
 #include "pybind11/stl_bind.h"
 void include_types_5(py::module &gen);
 void include_types_4(py::module &gen) {
+  //danet::ReflectionVar<Point3> bindings
+  bind_time_state<Point3>(gen, "Point3_ts");
+  bind_readonly_vector<dag::Vector<danet::ReflectionVar<Point3>::TimeState>>(gen, "Point3_ts_vector");
+
+  bind_reflection_var<Point3>(gen, "Point3_var");
   //danet::ReflectionVar<danet::dummyForExitZonesSettings> bindings
   bind_time_state<danet::dummyForExitZonesSettings>(gen, "danet_dummyForExitZonesSettings_ts");
   bind_readonly_vector<dag::Vector<danet::ReflectionVar<danet::dummyForExitZonesSettings>::TimeState>>(gen, "danet_dummyForExitZonesSettings_ts_vector");
@@ -43,10 +48,5 @@ void include_types_4(py::module &gen) {
   bind_readonly_vector<dag::Vector<danet::ReflectionVar<danet::UnitIdStruct>::TimeState>>(gen, "danet_UnitIdStruct_ts_vector");
 
   bind_reflection_var<danet::UnitIdStruct>(gen, "danet_UnitIdStruct_var");
-  //danet::ReflectionVar<std::vector<danet::UnitIdStruct>> bindings
-  bind_time_state<std::vector<danet::UnitIdStruct>>(gen, "std_vector_danet_UnitIdStruct__ts");
-  bind_readonly_vector<dag::Vector<danet::ReflectionVar<std::vector<danet::UnitIdStruct>>::TimeState>>(gen, "std_vector_danet_UnitIdStruct__ts_vector");
-
-  bind_reflection_var<std::vector<danet::UnitIdStruct>>(gen, "std_vector_danet_UnitIdStruct__var");
   include_types_5(gen);
 }

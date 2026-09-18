@@ -1,7 +1,6 @@
 #include "Replay/Replay.h"
 #include "filesystem"
 #include "dag_assert.h"
-#include "libdeflate.h"
 #include "danet/daNetTypes.h"
 
 std::string packet_names[]{"End", "Start", "Aircraft", "Chat", "MPI", "NextSegment", "ECS", "Snapshot", "ECS_Msg_Sync"};
@@ -298,7 +297,7 @@ std::span<uint8_t> ReplayWriter<streamWrite>::getCompressedData(std::vector<uint
   } else {
     storage.resize(zstd_compress_bound(base_cb.tell()));
     auto compressed_size = zstd_compress(storage.data(), storage.size(), base_cb.data(), base_cb.tell(), 18);
-    storage.resize(compressed_size);
+    storage.resize(compressed_size);*/
     storage.shrink_to_fit();
     return storage;
   }

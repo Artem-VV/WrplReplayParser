@@ -23,7 +23,7 @@ namespace danet {
 
   int CountryCoder(DANET_ENCODER_SIGNATURE);
 
-  int ecsEntityId_20arrayCoder(DANET_ENCODER_SIGNATURE);
+  int dummyForSupportPlanesCoder(DANET_ENCODER_SIGNATURE);
 
   int CrewUnitsListCoder(DANET_ENCODER_SIGNATURE);
 
@@ -97,8 +97,8 @@ namespace danet {
   };
 
   template <>
-  struct DefaultEncoderChooser<std::array<ecs::EntityId,20>> {
-    static constexpr reflection_var_encoder coder = ecsEntityId_20arrayCoder;
+  struct DefaultEncoderChooser<danet::dummyForSupportPlanes> {
+    static constexpr reflection_var_encoder coder = dummyForSupportPlanesCoder;
   };
 
   template <>

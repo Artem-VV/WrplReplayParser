@@ -23,6 +23,11 @@ void include_types_2(py::module &gen) {
   bind_readonly_vector<dag::Vector<danet::ReflectionVar<int64_t>::TimeState>>(gen, "int64_t_ts_vector");
 
   bind_reflection_var<int64_t>(gen, "int64_t_var");
+  //danet::ReflectionVar<std::vector<ecs::EntityId>> bindings
+  bind_time_state<std::vector<ecs::EntityId>>(gen, "std_vector_ecs_EntityId__ts");
+  bind_readonly_vector<dag::Vector<danet::ReflectionVar<std::vector<ecs::EntityId>>::TimeState>>(gen, "std_vector_ecs_EntityId__ts_vector");
+
+  bind_reflection_var<std::vector<ecs::EntityId>>(gen, "std_vector_ecs_EntityId__var");
   //danet::ReflectionVar<DataBlock> bindings
   bind_time_state<DataBlock>(gen, "DataBlock_ts");
   bind_readonly_vector<dag::Vector<danet::ReflectionVar<DataBlock>::TimeState>>(gen, "DataBlock_ts_vector");
@@ -33,20 +38,15 @@ void include_types_2(py::module &gen) {
   bind_readonly_vector<dag::Vector<danet::ReflectionVar<danet::Country>::TimeState>>(gen, "danet_Country_ts_vector");
 
   bind_reflection_var<danet::Country>(gen, "danet_Country_var");
-  //danet::ReflectionVar<std::array<ecs::EntityId,20>> bindings
-  bind_time_state<std::array<ecs::EntityId,20>>(gen, "std_array_ecs_EntityId_20__ts");
-  bind_readonly_vector<dag::Vector<danet::ReflectionVar<std::array<ecs::EntityId,20>>::TimeState>>(gen, "std_array_ecs_EntityId_20__ts_vector");
+  //danet::ReflectionVar<danet::dummyForSupportPlanes> bindings
+  bind_time_state<danet::dummyForSupportPlanes>(gen, "danet_dummyForSupportPlanes_ts");
+  bind_readonly_vector<dag::Vector<danet::ReflectionVar<danet::dummyForSupportPlanes>::TimeState>>(gen, "danet_dummyForSupportPlanes_ts_vector");
 
-  bind_reflection_var<std::array<ecs::EntityId,20>>(gen, "std_array_ecs_EntityId_20__var");
+  bind_reflection_var<danet::dummyForSupportPlanes>(gen, "danet_dummyForSupportPlanes_var");
   //danet::ReflectionVar<danet::CrewUnitsList> bindings
   bind_time_state<danet::CrewUnitsList>(gen, "danet_CrewUnitsList_ts");
   bind_readonly_vector<dag::Vector<danet::ReflectionVar<danet::CrewUnitsList>::TimeState>>(gen, "danet_CrewUnitsList_ts_vector");
 
   bind_reflection_var<danet::CrewUnitsList>(gen, "danet_CrewUnitsList_var");
-  //danet::ReflectionVar<float> bindings
-  bind_time_state<float>(gen, "float_ts");
-  bind_readonly_vector<dag::Vector<danet::ReflectionVar<float>::TimeState>>(gen, "float_ts_vector");
-
-  bind_reflection_var<float>(gen, "float_var");
   include_types_3(gen);
 }

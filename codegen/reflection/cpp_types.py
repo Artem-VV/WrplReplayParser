@@ -182,3 +182,17 @@ class DamagedState_reg(DataTypeRegister):
 class country_reg(DataTypeRegister):
     name = "danet::Country"
     is_pod = True
+
+
+class dummyForSupportPlanes_t_reg(DataTypeRegister):
+    name = "danet::dummyForSupportPlanes"
+    members = [
+        "ecs::EntityId eid1;",
+        "std::compressed_vector<ecs::EntityId, uint32_t> eid1_list;",
+        "ecs::EntityId eid2;",
+        "std::compressed_vector<ecs::EntityId, uint32_t> eid2_list;",
+        "ecs::EntityId eid3;",
+        "std::compressed_vector<ecs::EntityId, uint32_t> eid3_list;",
+        "ecs::EntityId eid4;",
+        "std::compressed_vector<ecs::EntityId, uint32_t> eid4_list;",
+    ]
