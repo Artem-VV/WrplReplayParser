@@ -18,6 +18,7 @@
 #include <csignal>
 #include <cstdlib>
 
+#include "mpi/codegen/mpiUiStubs.h"
 // #include <unistd.h>
 
 

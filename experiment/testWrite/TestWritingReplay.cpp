@@ -4,6 +4,7 @@
 #include "Replay/Replay.h"
 #include "Logger.h"
 
+#include "mpi/codegen/mpiUiStubs.h"
 int main() {
   g_log_handler.initialize();
   DynamicMemGeneralSaveCB wcb;

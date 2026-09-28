@@ -2,8 +2,9 @@
     #include <ecs/query/entitySystem.h>
     #include <ecs/componentTypes.h>
     #include <ecs/ComponentTypesDefs.h>
+    #include <Pull.h>
     #include "BaseEntityES.cpp.inl"
-ECS_DEF_PULL_VAR(BaseEntity);
+DEF_PULL_VAR(BaseEntity);
 #include <ecs/query/performQuery.h>
 static constexpr ecs::ComponentDesc on_tank_appear_es_comps[] =
 {
@@ -28,7 +29,7 @@ static void on_tank_appear_es_all_events(ecs::EntityManager &mgr, const ecs::Eve
 static ecs::EntitySystemDesc on_tank_appear_es_es_desc
 (
   "on_tank_appear_es",
-  "D:/ReplayParser/replay/events/BaseEntityES.cpp.inl",
+  "replay/events/BaseEntityES.cpp.inl",
   ecs::EntitySystemOps(on_tank_appear_es_all_events),
   ecs::make_span(on_tank_appear_es_comps+0, 1)/*rw*/,
   ecs::make_span(on_tank_appear_es_comps+1, 2)/*ro*/,
@@ -59,7 +60,7 @@ static void on_aircraft_appear_es_all_events(ecs::EntityManager &mgr, const ecs:
 static ecs::EntitySystemDesc on_aircraft_appear_es_es_desc
 (
   "on_aircraft_appear_es",
-  "D:/ReplayParser/replay/events/BaseEntityES.cpp.inl",
+  "replay/events/BaseEntityES.cpp.inl",
   ecs::EntitySystemOps(on_aircraft_appear_es_all_events),
   ecs::make_span(on_aircraft_appear_es_comps+0, 1)/*rw*/,
   ecs::make_span(on_aircraft_appear_es_comps+1, 2)/*ro*/,
@@ -84,7 +85,7 @@ static void on_unit_disappear_es_all_events(ecs::EntityManager &mgr, const ecs::
 static ecs::EntitySystemDesc on_unit_disappear_es_es_desc
 (
   "on_unit_disappear_es",
-  "D:/ReplayParser/replay/events/BaseEntityES.cpp.inl",
+  "replay/events/BaseEntityES.cpp.inl",
   ecs::EntitySystemOps(on_unit_disappear_es_all_events),
   ecs::make_span(on_unit_disappear_es_comps+0, 1)/*rw*/,
   ecs::empty_span(),
@@ -113,7 +114,7 @@ static void after_unit_appear_es_all_events(ecs::EntityManager &mgr, const ecs::
 static ecs::EntitySystemDesc after_unit_appear_es_es_desc
 (
   "after_unit_appear_es",
-  "D:/ReplayParser/replay/events/BaseEntityES.cpp.inl",
+  "replay/events/BaseEntityES.cpp.inl",
   ecs::EntitySystemOps(after_unit_appear_es_all_events),
   ecs::make_span(after_unit_appear_es_comps+0, 1)/*rw*/,
   ecs::make_span(after_unit_appear_es_comps+1, 1)/*ro*/,
@@ -153,7 +154,7 @@ if (evt.is<ecs::EventEntityDestroyedBasic>()) {
 static ecs::EntitySystemDesc uid_entity_es_es_desc
 (
   "uid_entity_es",
-  "D:/ReplayParser/replay/events/BaseEntityES.cpp.inl",
+  "replay/events/BaseEntityES.cpp.inl",
   ecs::EntitySystemOps(uid_entity_es_all_events),
   ecs::make_span(uid_entity_es_comps+0, 1)/*rw*/,
   ecs::make_span(uid_entity_es_comps+1, 2)/*ro*/,
@@ -182,7 +183,7 @@ static void on_unit_appear_mpi_es_all_events(ecs::EntityManager &mgr, const ecs:
 static ecs::EntitySystemDesc on_unit_appear_mpi_es_es_desc
 (
   "on_unit_appear_mpi_es",
-  "D:/ReplayParser/replay/events/BaseEntityES.cpp.inl",
+  "replay/events/BaseEntityES.cpp.inl",
   ecs::EntitySystemOps(on_unit_appear_mpi_es_all_events),
   ecs::empty_span(),
   ecs::make_span(on_unit_appear_mpi_es_comps+0, 2)/*ro*/,

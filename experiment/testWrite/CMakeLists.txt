@@ -11,7 +11,6 @@ target_link_libraries(dagor_rpl_write_test
         VROMFS::VROMFS
         Replay::Replay
         ZLIB::ZLIB
-        MPI_UI_STUBS::MPI_UI_STUBS
         # mimalloc
 
 )

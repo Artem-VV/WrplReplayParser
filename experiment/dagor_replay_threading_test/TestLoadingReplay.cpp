@@ -19,6 +19,7 @@
 #include "tracy/Tracy.hpp"
 
 
+#include "mpi/codegen/mpiUiStubs.h"
 
 std::string convert_os_path_to_wsl2(std::string &str) { // this function assumes a windows os with a wsl2 linux
   G_ASSERTF(str[1] == ':', "must be an absolute path");
@@ -34,21 +35,21 @@ std::string convert_os_path_to_wsl2(const char *str) {
   std::string t(str);
   return convert_os_path_to_wsl2(t);
 }
-//#include <sanitizer/asan_interface.h>
+// #include <sanitizer/asan_interface.h>
 
-//void checkMemory() {
-  // Prints all live allocations (with stacks) to stderr
+// void checkMemory() {
+//  Prints all live allocations (with stacks) to stderr
 //  __asan_print_accumulated_stats();
 //}
 
-void thread_replay(std::string & path, int thread_count, bool is_server_replay) {
+void thread_replay(std::string &path, int thread_count, bool is_server_replay) {
 
   auto worker = [&](int id) {
     ZoneScopedN("Worker Run");
     ParserState *state_ptr = nullptr;
     IReplay *rpl = nullptr;
     IReplayReader *rdr = nullptr;
-    //sync_point.arrive_and_wait(); // block until all threads are ready
+    // sync_point.arrive_and_wait(); // block until all threads are ready
     std::cout << fmt::format("Thread {} started!\n", id);
     auto start = std::chrono::high_resolution_clock::now();
     {
@@ -88,7 +89,7 @@ void thread_replay(std::string & path, int thread_count, bool is_server_replay) 
 }
 
 int main() {
-  //std::signal(SIGSEGV, signal_handler);
+  // std::signal(SIGSEGV, signal_handler);
   fs::path conf_dir = CONFIG_DIR;
   fs::path config_file = conf_dir / "dagor_replay_test.blk";
   DataBlock conf_blk{};
@@ -104,10 +105,10 @@ int main() {
   G_UNUSED(source_is_linux_path);
   G_UNUSED(bin_is_linux_path);
 #ifdef _TARGET_PC_LINUX
-  if(!source_is_linux_path) {
+  if (!source_is_linux_path) {
     rpl_path_str = convert_os_path_to_wsl2(replay_path);
   }
-  if(!bin_is_linux_path) {
+  if (!bin_is_linux_path) {
     bin_path_str = convert_os_path_to_wsl2(bin_path);
   }
 #endif

@@ -2,8 +2,9 @@
     #include <ecs/query/entitySystem.h>
     #include <ecs/componentTypes.h>
     #include <ecs/ComponentTypesDefs.h>
+    #include <Pull.h>
     #include "UpdateMPlayerES.cpp.inl"
-ECS_DEF_PULL_VAR(UpdateMPlayer);
+DEF_PULL_VAR(UpdateMPlayer);
 #include <ecs/query/performQuery.h>
 static constexpr ecs::ComponentDesc mplayer_add_entity_es_comps[] =
 {
@@ -45,7 +46,7 @@ if (evt.is<ecs::EventEntityDestroyedBasic>()) {
 static ecs::EntitySystemDesc mplayer_add_entity_es_es_desc
 (
   "mplayer_add_entity_es",
-  "D:/ReplayParser/replay/events/UpdateMPlayerES.cpp.inl",
+  "replay/events/UpdateMPlayerES.cpp.inl",
   ecs::EntitySystemOps(mplayer_add_entity_es_all_events),
   ecs::empty_span(),
   ecs::make_span(mplayer_add_entity_es_comps+0, 3)/*ro*/,

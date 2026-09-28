@@ -20,7 +20,6 @@ target_link_libraries(PyMpi
         pybind11::module
         Python::Python
         MPI::MPI
-        MPI_UI_STUBS::MPI_UI_STUBS
         PyECS::PyECS
 )
 

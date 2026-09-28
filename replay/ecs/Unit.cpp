@@ -329,8 +329,12 @@ namespace unit {
     }
     auto model_name = blk.getStr("model", "");
     auto skel_name = getGoodSkelName(model_name);
-    has_tree = g_grp_manager.getTree(skel_name, geom_tree);
+    {
+      ZoneScopedN("Unit::loadWeaponData::getTree");
+      has_tree = g_grp_manager.getTree(skel_name, geom_tree);
+    }
     if (has_tree) {
+      ZoneScopedN("Unit::loadWeaponData::makeTurretTree");
       this->turret_tree = std::make_unique<unit::TurretTree>(&geom_tree);
     }
     // The damage model is a skeleton of its own, next to the visual one in the same

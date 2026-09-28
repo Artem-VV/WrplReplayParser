@@ -321,9 +321,6 @@ namespace ecs {
   }
 
 
-#define ECS_PULL_VAR(x)      ecs_pull_##x
-#define ECS_DECL_PULL_VAR(x) extern const size_t ecs_pull_##x
-#define ECS_DEF_PULL_VAR(x)  extern const size_t ecs_pull_##x = (size_t) (&ecs_pull_##x)
 } // namespace ecs
 
 

@@ -6,6 +6,7 @@
 #include <ecs/componentsMap.h>
 #include <ecs/componentTypes.h>
 #include <ecs/EntityManager.h>
+#include "Pull.h"
 
 #define REG_SYS     \
   RS(BaseEntity)    \
@@ -13,14 +14,14 @@
   RS(Rocketry)
 
 
-#define RS(x) ECS_DECL_PULL_VAR(x);
+#define RS(x) DECL_PULL_VAR(x);
 REG_SYS
 #undef RS
 
 // this var is required to actually pull static ctors from EntitySystem's objects that otherwise have no other publicly
 // visible symbols
-volatile size_t framework_primary_pulls = 0
-#define RS(x) +ECS_PULL_VAR(x)
+volatile size_t ecs_primary_pulls = 0
+#define RS(x) + PULL_VAR(x)
   REG_SYS
 #undef RS
 

@@ -6,7 +6,7 @@ from codegen.reflection import custom_rw
 from hashCheck import HashChecker
 
 from reflection import builtin_types
-from  reflection import cpp_types
+from reflection import cpp_types
 import reflection.objects.ReflectableObjects as objects
 from reflection.parser import generate_reflectables, generate_bindings
 import inspect
@@ -32,11 +32,11 @@ def codegen_reflection(force_gen: bool = False):
     obj_imports = [objects]
     type_imports = [builtin_types, cpp_types]
 
-    file_paths = [*[inspect.getsourcefile(module) for module in obj_imports], *[inspect.getsourcefile(module) for module in type_imports]]
+    file_paths = [*[inspect.getsourcefile(module) for module in obj_imports],
+                  *[inspect.getsourcefile(module) for module in type_imports]]
     file_paths.append(inspect.getsourcefile(custom_rw))
-    if check_hash("ReflectionObjBindings", file_paths) and False:
+    if check_hash("ReflectionObjBindings", file_paths):
         return
-
 
     root_path = ROOT_PATH + "/"
     obj_codegen_header = root_path + r"replay/include/mpi/codegen"
@@ -51,7 +51,7 @@ def codegen_reflection(force_gen: bool = False):
 
 # codegen for DagECS. this basically calls into the dagECS codegen.
 def codegen_ecs():
-    SEARCH_DIRS = [f"{ROOT_PATH}/replay", f"{ROOT_PATH}/replay_inspector"]
+    SEARCH_DIRS = [f"../replay", f"../replay_inspector"]
     parsed_objects = set()
     for d in SEARCH_DIRS:
         for p in pathlib.Path(d).rglob("*.cpp.inl"):
@@ -68,12 +68,8 @@ def codegen_ecs():
                 print(f"generated {inp_file_path}")
 
 
-
-
-
-
 if __name__ == "__main__":
-    assert os.path.exists(r"D:\develop\devtools\LLVM-18.1.8") # blame gaijin they wanted it
+    assert os.path.exists(r"D:\develop\devtools\LLVM-18.1.8")  # blame gaijin they wanted it
     os.environ['DAGOR_CLANG_DIR'] = r"D:\develop\devtools\LLVM-18.1.8"
     codegen_reflection()
     codegen_ecs()

@@ -16,9 +16,10 @@
 #include <csignal>
 #include <cstdlib>
 
-//#include <unistd.h>
+// #include <unistd.h>
 
 
+#include "mpi/codegen/mpiUiStubs.h"
 std::string convert_os_path_to_wsl2(std::string &str) { // this function assumes a windows os with a wsl2 linux
   G_ASSERTF(str[1] == ':', "must be an absolute path");
   std::string payload = "/mnt/";
@@ -35,7 +36,7 @@ std::string convert_os_path_to_wsl2(const char *str) {
 }
 
 int main() {
-  //std::signal(SIGSEGV, signal_handler);
+  // std::signal(SIGSEGV, signal_handler);
   fs::path conf_dir = CONFIG_DIR;
   fs::path config_file = conf_dir / "dagor_replay_test.blk";
   DataBlock conf_blk;
@@ -46,31 +47,31 @@ int main() {
   std::string bin_path_str = bin_path;
   G_UNUSED(bin_is_linux_path);
 #ifdef _TARGET_PC_LINUX
-  if(!bin_is_linux_path) {
+  if (!bin_is_linux_path) {
     bin_path_str = convert_os_path_to_wsl2(bin_path);
   }
 #endif
   std::string logfile_str = (conf_dir / "logfile.txt").string();
   initialize(bin_path_str, "", logfile_str);
   g_log_handler->start_thread();
-  //auto t = ecs::g_ecs_data->getTemplateDB()->getTemplate("attachable_wear_fast_sf_helmet_item");
+  // auto t = ecs::g_ecs_data->getTemplateDB()->getTemplate("attachable_wear_fast_sf_helmet_item");
   IReplayReader *rdr = nullptr;
   IReplay *rpl = nullptr;
   std::string repl_1 = R"(D:\SteamLibrary\steamapps\common\War Thunder\Replays\#2026.05.09 03.04.41.wrpl)";
   std::string repl_2 = R"(D:\SteamLibrary\steamapps\common\War Thunder\Replays\#2026.05.09 11.16.58.wrpl)";
 #ifdef _TARGET_PC_LINUX
   repl_1 = convert_os_path_to_wsl2(repl_1);
-    repl_2 = convert_os_path_to_wsl2(repl_2);
+  repl_2 = convert_os_path_to_wsl2(repl_2);
 #endif
 
-    Replay rpl1{repl_1};
-    rdr = rpl1.getReplayReader();
-    delete rdr;
+  Replay rpl1{repl_1};
+  rdr = rpl1.getReplayReader();
+  delete rdr;
 
 
-    Replay rpl2{repl_2};
-    rdr = rpl1.getReplayReader();
-    ReplayPacket pkt{};
-    delete rdr;
+  Replay rpl2{repl_2};
+  rdr = rpl1.getReplayReader();
+  ReplayPacket pkt{};
+  delete rdr;
   return 0;
 }

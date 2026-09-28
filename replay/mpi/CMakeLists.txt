@@ -2,12 +2,13 @@ add_library(MPI STATIC
         mpi.cpp
         reflection.cpp
         ObjectDispatcher.cpp
-        serializers.cpp
         codegen/serializers.cpp
+        serializers.cpp
         Replication.cpp
         BattleMessages.cpp
         HitMessages.cpp
         PositionSync.cpp
+        MpiPull.cpp
 )
 
 
@@ -39,20 +40,3 @@ target_include_directories(MPI
 
 
 SetGenFlags(MPI)
-
-add_library(MPI_UI_STUBS STATIC
-    codegen/mpiUiStubs.cpp
-)
-
-target_link_libraries(MPI_UI_STUBS
-        MPI::MPI
-        dagBlk::dagBlk
-        DAG_MATH::DAG_MATH
-)
-
-target_include_directories(MPI_UI_STUBS
-        PUBLIC
-        ${INCLUDES}
-)
-
-add_library(MPI_UI_STUBS::MPI_UI_STUBS ALIAS MPI_UI_STUBS)

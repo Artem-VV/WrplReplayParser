@@ -14,8 +14,8 @@ event_handler_suffix = "_event_handler"
 
 # replace with regexp
 def is_es_name(name):
-   return name.endswith(es_suffix) \
-       or name.endswith(es_suffix + event_handler_suffix)
+    return name.endswith(es_suffix) \
+        or name.endswith(es_suffix + event_handler_suffix)
 
 
 # if len(sys.argv) < 4:
@@ -82,7 +82,8 @@ def generate(input_file_name: str, output_file_name: str, rel_path_for_include: 
     clang_args = clang_args + ['-D_ECS_CODEGEN']
     # print clang_args
     all_gets = []
-    allParsedFunctions = parse_ecs_functions(input_file_name, os.path.basename(input_file_name), clang_args, is_es_name, False, compiler_errors, all_gets)
+    allParsedFunctions = parse_ecs_functions(input_file_name, os.path.basename(input_file_name), clang_args, is_es_name,
+                                             False, compiler_errors, all_gets)
 
     resultCode = gen_es(allParsedFunctions, event_handler_suffix, input_file_name)
     gets_code = ""
@@ -90,66 +91,73 @@ def generate(input_file_name: str, output_file_name: str, rel_path_for_include: 
     # Note: line info significantly increase commits diffs & creates conflictcs on branch merges for frequently changed files (so it disabled by default)
     veboselineinfo = os.environ.get('ECS_CODEGEN_VERBOSE_LINEINFO', 'no') == 'yes'
     for some_get, some_get_type in all_gets:
-      get_type = remove_const_from_type(some_get_type['type'])
-      some_get_name = some_get.replace("_dot_", dot_suffix)
-      if some_get_name != some_get:
-        print("Using _dot_ is deprecated, check {name} in {file} Line {line}".format(name = some_get, file = some_get_type['file'], line = some_get_type['line']))
-      file = some_get_type['file']
-      line = some_get_type['line'] if veboselineinfo else 0
-      fun = some_get_type['fun']
-      while file.startswith("../"):
-        file = file[len("../"):]
-      get_component_type_fun = '''static constexpr ecs::component_t {some_get}_get_type()'''.format(**locals())
-      gets_code += get_component_type_fun + ";\n"
-      gets_type_code += get_component_type_fun + '''{{return ecs::ComponentTypeInfo<{get_type}>::type; }}\n'''.format(**locals())
-      gets_code += '''static ecs::LTComponentList {some_get}_component(ECS_HASH("{some_get_name}"), {some_get}_get_type(), "{file}", "{fun}", {line});\n'''.format(**locals())
+        get_type = remove_const_from_type(some_get_type['type'])
+        some_get_name = some_get.replace("_dot_", dot_suffix)
+        if some_get_name != some_get:
+            print("Using _dot_ is deprecated, check {name} in {file} Line {line}".format(name=some_get,
+                                                                                         file=some_get_type['file'],
+                                                                                         line=some_get_type['line']))
+        file = some_get_type['file']
+        line = some_get_type['line'] if veboselineinfo else 0
+        fun = some_get_type['fun']
+        while file.startswith("../"):
+            file = file[len("../"):]
+        get_component_type_fun = '''static constexpr ecs::component_t {some_get}_get_type()'''.format(**locals())
+        gets_code += get_component_type_fun + ";\n"
+        gets_type_code += get_component_type_fun + '''{{return ecs::ComponentTypeInfo<{get_type}>::type; }}\n'''.format(
+            **locals())
+        gets_code += '''static ecs::LTComponentList {some_get}_component(ECS_HASH("{some_get_name}"), {some_get}_get_type(), "{file}", "{fun}", {line});\n'''.format(
+            **locals())
 
     include_preamble = """// Built with ECS codegen version %s
     #include <ecs/query/entitySystem.h>
     #include <ecs/componentTypes.h>
     #include <ecs/ComponentTypesDefs.h>
+    #include <Pull.h>
     """ % version
     include_preamble += '#include "' + rel_path_for_include + '"\n'
     if rel_path_for_include.endswith('ES.cpp.inl'):
-      include_preamble += 'ECS_DEF_PULL_VAR(' + rel_path_for_include[0:len(rel_path_for_include)-10].rsplit('/',1)[0] + ');\n'
+        include_preamble += 'DEF_PULL_VAR(' + rel_path_for_include[0:len(rel_path_for_include) - 10].rsplit('/', 1)[
+            0] + ');\n'
     elif rel_path_for_include.endswith('.cpp.inl'):
-      include_preamble += 'ECS_DEF_PULL_VAR(' + rel_path_for_include[0:len(rel_path_for_include)-8].rsplit('/',1)[0] + ');\n'
+        include_preamble += 'DEF_PULL_VAR(' + rel_path_for_include[0:len(rel_path_for_include) - 8].rsplit('/', 1)[
+            0] + ');\n'
 
     resultCode = include_preamble + resultCode
     if len(gets_code) > 0:
-      resultCode = "#include <daECS/core/internal/ltComponentList.h>\n" + gets_code + resultCode + gets_type_code
+        resultCode = "#include <daECS/core/internal/ltComponentList.h>\n" + gets_code + resultCode + gets_type_code
 
     is_file_changed = True
     if len(sys.argv) > 4 and sys.argv[4] == 'CHECK':
-      is_file_changed = False
+        is_file_changed = False
 
     existing_lines = ''
 
     if os.path.isfile(output_file_name):
-      with io.open(output_file_name, 'rt', encoding='utf-8') as f:
-        existing_lines = f.read()
+        with io.open(output_file_name, 'rt', encoding='utf-8') as f:
+            existing_lines = f.read()
 
-      if resultCode != existing_lines:
-        is_file_changed = True
+        if resultCode != existing_lines:
+            is_file_changed = True
 
     else:
-      is_file_changed = True
+        is_file_changed = True
 
     if len(sys.argv) > 4 and (sys.argv[4] == 'CHECK'):
-      if is_file_changed:
-        print("ERROR: " + sys.argv[2] + " is missing or altered")
-        if (len(compiler_errors) > 0):
-          print(compiler_errors)
-        if os.path.isfile(output_file_name):
-          for line in difflib.unified_diff(existing_lines.splitlines(), resultCode.splitlines()):
-            sys.stdout.write(line)
-        else:
-          print("file was not commited: '" + output_file_name + "'")
-        sys.exit(13)
-      sys.exit(0)
+        if is_file_changed:
+            print("ERROR: " + sys.argv[2] + " is missing or altered")
+            if (len(compiler_errors) > 0):
+                print(compiler_errors)
+            if os.path.isfile(output_file_name):
+                for line in difflib.unified_diff(existing_lines.splitlines(), resultCode.splitlines()):
+                    sys.stdout.write(line)
+            else:
+                print("file was not commited: '" + output_file_name + "'")
+            sys.exit(13)
+        sys.exit(0)
 
     if is_file_changed:
-      # Use windows line ending if WSL linux detected
-      nl = '\r\n' if ('linux' in sys.platform and 'Microsoft' in open('/proc/sys/kernel/osrelease').read()) else None
-      with io.open(output_file_name, 'wt', encoding='utf-8', newline=nl) as f:
-        f.write(unicode(resultCode, 'utf-8') if sys.version_info[0] == 2 else resultCode)
+        # Use windows line ending if WSL linux detected
+        nl = '\r\n' if ('linux' in sys.platform and 'Microsoft' in open('/proc/sys/kernel/osrelease').read()) else None
+        with io.open(output_file_name, 'wt', encoding='utf-8', newline=nl) as f:
+            f.write(unicode(resultCode, 'utf-8') if sys.version_info[0] == 2 else resultCode)

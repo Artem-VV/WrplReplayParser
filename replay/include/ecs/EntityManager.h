@@ -56,7 +56,6 @@ DEFINE_HANDLE(handle_entity)
 
 class PyGState; // for python bindings
 struct ParserState;
-extern volatile size_t framework_primary_pulls;
 
 
 namespace dag {
@@ -361,8 +360,7 @@ namespace ecs {
     friend EntityManager;
 
   public:
-    EntityCreatedAction(const EntityId before, const EntityId after) :
-      RewindAction(), before(before), after(after) {}
+    EntityCreatedAction(const EntityId before, const EntityId after) : RewindAction(), before(before), after(after) {}
     ~EntityCreatedAction() override = default;
     void forward(EntityManager &mgr) override;
     void backward(EntityManager &mgr) override;
@@ -374,8 +372,7 @@ namespace ecs {
     friend EntityManager;
 
   public:
-    EntityDestroyedAction(const EntityId before, const EntityId after) :
-      RewindAction(), before(before), after(after) {}
+    EntityDestroyedAction(const EntityId before, const EntityId after) : RewindAction(), before(before), after(after) {}
     ~EntityDestroyedAction() override = default;
     void forward(EntityManager &mgr) override;
     void backward(EntityManager &mgr) override;
@@ -570,7 +567,7 @@ namespace ecs {
     BitVector wasInit{false}; // used during entity creation
     MgrArchetypeStorage arch_data; // EntityManager now only owns raw entity storage
     uint32_t last_time_modified = 0;
-    EcsRewindEvent * curr_event;
+    EcsRewindEvent *curr_event;
   };
 } // namespace ecs
 

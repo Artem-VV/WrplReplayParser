@@ -14,7 +14,6 @@ target_link_libraries(test_multiple_replays
         dagECS::dagECS
         INIT::INIT
         Replay::Replay
-        MPI_UI_STUBS::MPI_UI_STUBS
 
 )
 

@@ -496,7 +496,7 @@ class DataTypeManager:
                     f.write(serializer)
                 f.write("}")
 
-            with open(f"{codegen_cpp_path}/mpiUiStubs.cpp", "w") as f:
+            with open(f"{codegen_header_path}/mpiUiStubs.h", "w") as f:
                 write_header(f)
                 f.write("#include \"mpi/serializers.h\"\n")
                 f.write("#include \"mpi/codegen/ReflIncludes.h\"\n")
