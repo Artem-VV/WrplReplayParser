@@ -2,8 +2,9 @@
     #include <ecs/query/entitySystem.h>
     #include <ecs/componentTypes.h>
     #include <ecs/ComponentTypesDefs.h>
+    #include <Pull.h>
     #include "RocketryES.cpp.inl"
-ECS_DEF_PULL_VAR(Rocketry);
+DEF_PULL_VAR(Rocketry);
 #include <ecs/query/performQuery.h>
 static constexpr ecs::ComponentDesc on_rocket_appear_es_comps[] =
 {
@@ -23,7 +24,7 @@ static void on_rocket_appear_es_all_events(ecs::EntityManager &mgr, const ecs::E
 static ecs::EntitySystemDesc on_rocket_appear_es_es_desc
 (
   "on_rocket_appear_es",
-  "D:/ReplayParser/replay/events/RocketryES.cpp.inl",
+  "replay/events/RocketryES.cpp.inl",
   ecs::EntitySystemOps(on_rocket_appear_es_all_events),
   ecs::make_span(on_rocket_appear_es_comps+0, 1)/*rw*/,
   ecs::empty_span(),
@@ -49,7 +50,7 @@ static void on_rocket_disappear_es_all_events(ecs::EntityManager &mgr, const ecs
 static ecs::EntitySystemDesc on_rocket_disappear_es_es_desc
 (
   "on_rocket_disappear_es",
-  "D:/ReplayParser/replay/events/RocketryES.cpp.inl",
+  "replay/events/RocketryES.cpp.inl",
   ecs::EntitySystemOps(on_rocket_disappear_es_all_events),
   ecs::make_span(on_rocket_disappear_es_comps+0, 1)/*rw*/,
   ecs::empty_span(),
@@ -75,7 +76,7 @@ static void on_bomb_appear_es_all_events(ecs::EntityManager &mgr, const ecs::Eve
 static ecs::EntitySystemDesc on_bomb_appear_es_es_desc
 (
   "on_bomb_appear_es",
-  "D:/ReplayParser/replay/events/RocketryES.cpp.inl",
+  "replay/events/RocketryES.cpp.inl",
   ecs::EntitySystemOps(on_bomb_appear_es_all_events),
   ecs::make_span(on_bomb_appear_es_comps+0, 1)/*rw*/,
   ecs::empty_span(),
@@ -101,7 +102,7 @@ static void on_bomb_disappear_es_all_events(ecs::EntityManager &mgr, const ecs::
 static ecs::EntitySystemDesc on_bomb_disappear_es_es_desc
 (
   "on_bomb_disappear_es",
-  "D:/ReplayParser/replay/events/RocketryES.cpp.inl",
+  "replay/events/RocketryES.cpp.inl",
   ecs::EntitySystemOps(on_bomb_disappear_es_all_events),
   ecs::make_span(on_bomb_disappear_es_comps+0, 1)/*rw*/,
   ecs::empty_span(),
@@ -127,7 +128,7 @@ static void on_torpedo_appear_es_all_events(ecs::EntityManager &mgr, const ecs::
 static ecs::EntitySystemDesc on_torpedo_appear_es_es_desc
 (
   "on_torpedo_appear_es",
-  "D:/ReplayParser/replay/events/RocketryES.cpp.inl",
+  "replay/events/RocketryES.cpp.inl",
   ecs::EntitySystemOps(on_torpedo_appear_es_all_events),
   ecs::make_span(on_torpedo_appear_es_comps+0, 1)/*rw*/,
   ecs::empty_span(),
@@ -153,7 +154,7 @@ static void on_torpedo_disappear_es_all_events(ecs::EntityManager &mgr, const ec
 static ecs::EntitySystemDesc on_torpedo_disappear_es_es_desc
 (
   "on_torpedo_disappear_es",
-  "D:/ReplayParser/replay/events/RocketryES.cpp.inl",
+  "replay/events/RocketryES.cpp.inl",
   ecs::EntitySystemOps(on_torpedo_disappear_es_all_events),
   ecs::make_span(on_torpedo_disappear_es_comps+0, 1)/*rw*/,
   ecs::empty_span(),
@@ -179,7 +180,7 @@ static void on_payload_appear_es_all_events(ecs::EntityManager &mgr, const ecs::
 static ecs::EntitySystemDesc on_payload_appear_es_es_desc
 (
   "on_payload_appear_es",
-  "D:/ReplayParser/replay/events/RocketryES.cpp.inl",
+  "replay/events/RocketryES.cpp.inl",
   ecs::EntitySystemOps(on_payload_appear_es_all_events),
   ecs::make_span(on_payload_appear_es_comps+0, 1)/*rw*/,
   ecs::empty_span(),
@@ -205,7 +206,7 @@ static void on_payload_disappear_es_all_events(ecs::EntityManager &mgr, const ec
 static ecs::EntitySystemDesc on_payload_disappear_es_es_desc
 (
   "on_payload_disappear_es",
-  "D:/ReplayParser/replay/events/RocketryES.cpp.inl",
+  "replay/events/RocketryES.cpp.inl",
   ecs::EntitySystemOps(on_payload_disappear_es_all_events),
   ecs::make_span(on_payload_disappear_es_comps+0, 1)/*rw*/,
   ecs::empty_span(),
@@ -231,7 +232,7 @@ static void on_jettisoned_appear_es_all_events(ecs::EntityManager &mgr, const ec
 static ecs::EntitySystemDesc on_jettisoned_appear_es_es_desc
 (
   "on_jettisoned_appear_es",
-  "D:/ReplayParser/replay/events/RocketryES.cpp.inl",
+  "replay/events/RocketryES.cpp.inl",
   ecs::EntitySystemOps(on_jettisoned_appear_es_all_events),
   ecs::make_span(on_jettisoned_appear_es_comps+0, 1)/*rw*/,
   ecs::empty_span(),
@@ -257,7 +258,7 @@ static void on_jettisoned_disappear_es_all_events(ecs::EntityManager &mgr, const
 static ecs::EntitySystemDesc on_jettisoned_disappear_es_es_desc
 (
   "on_jettisoned_disappear_es",
-  "D:/ReplayParser/replay/events/RocketryES.cpp.inl",
+  "replay/events/RocketryES.cpp.inl",
   ecs::EntitySystemOps(on_jettisoned_disappear_es_all_events),
   ecs::make_span(on_jettisoned_disappear_es_comps+0, 1)/*rw*/,
   ecs::empty_span(),

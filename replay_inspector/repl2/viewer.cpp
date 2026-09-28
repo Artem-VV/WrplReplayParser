@@ -91,7 +91,7 @@ void* operator new[](std::size_t size, const std::nothrow_t&) noexcept {
 }*/
 
 
-ECS_DECL_PULL_VAR(query_draw_units);
+DECL_PULL_VAR(query_draw_units);
 
 volatile size_t inspector_pulls = ecs_pull_query_draw_units;
 

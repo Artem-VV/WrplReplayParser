@@ -1,6 +1,7 @@
 add_library(INIT
         STATIC
         init.cpp
+        StatePull.cpp
 )
 
 

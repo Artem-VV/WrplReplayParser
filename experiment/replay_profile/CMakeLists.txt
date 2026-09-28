@@ -18,7 +18,7 @@ target_link_libraries(ProfileReplayParsing
         dagECS::dagECS
         INIT::INIT
         Replay::Replay
-        MPI_UI_STUBS::MPI_UI_STUBS
+        MPI::MPI
 )
 
 target_include_directories(ProfileReplayParsing

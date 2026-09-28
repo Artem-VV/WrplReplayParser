@@ -1346,7 +1346,8 @@ bool DataBlockParser::parse(DataBlock &blk, bool isTop) {
 
 static bool parse_from_text(DataBlock &blk, std::vector<char> &text, const char *filename, bool robust_load,
                             DataBlock::IFileNotify *fnotify) {
-  char *end = text.size() ? (char *) memchr(text.data(), 0, text.size()) : (char *) NULL;
+  ZoneScopedN("blk::parse_from_text") char *end =
+    text.size() ? (char *) memchr(text.data(), 0, text.size()) : (char *) NULL;
   if (end)
     erase_items(text, end - text.data(), text.data() + text.size() - end);
   append_items(text, 3, "\n\0\0");
@@ -1393,6 +1394,7 @@ bool DataBlock::loadText(const char *text, int len, const char *filename, DataBl
 }
 
 bool DataBlock::load(const char *fname, DataBlock::IFileNotify *fnotify) {
+  ZoneScopedN("DataBlock::load");
   reset();
 
   if (!fname || !*fname) {
@@ -1463,6 +1465,7 @@ namespace dblk {
 
 
 bool DataBlock::loadFromStream(IGenLoad &crd, const char *fname, DataBlock::IFileNotify *fnotify, unsigned hint_size) {
+  ZoneScopedN("DataBlock::loadFromStream");
   reset();
   unsigned blkFlags = shared->blkFlags;
   if (fname)

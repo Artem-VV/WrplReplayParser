@@ -44,6 +44,7 @@ void HostFileIndex::init() {
 std::unique_ptr<File> HostFileIndex::getFile(std::shared_ptr<FileIndex> ths) { return std::make_unique<HostFile>(ths); }
 
 int64_t HostFile::read_impl(void *ptr, size_t length) {
+  ZoneScopedN("HostFile::read_impl");
   if (!file_stream.is_open())
     return -1;
   if (read_offs >= f_length)

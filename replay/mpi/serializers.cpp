@@ -1,6 +1,7 @@
 #include "mpi/serializers.h"
 #include "math/dag_mathBase.h"
-
+#include "Pull.h"
+DEF_PULL_VAR(MpiSerializers);
 namespace danet {
 
 

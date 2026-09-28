@@ -2,8 +2,9 @@
     #include <ecs/query/entitySystem.h>
     #include <ecs/componentTypes.h>
     #include <ecs/ComponentTypesDefs.h>
+    #include <Pull.h>
     #include "query_draw_units.cpp.inl"
-ECS_DEF_PULL_VAR(query_draw_units);
+DEF_PULL_VAR(query_draw_units);
 #include <ecs/query/performQuery.h>
 static constexpr ecs::ComponentDesc iterate_all_tanks_ecs_query_comps[] =
 {

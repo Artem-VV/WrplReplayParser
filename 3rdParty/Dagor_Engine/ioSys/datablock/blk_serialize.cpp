@@ -604,6 +604,7 @@ void DataBlock::saveToBinStreamWithoutNames(const DataBlockShared &names, IGenSa
 }
 
 bool DataBlock::loadFromBinDump(IGenLoad &cr, const DBNameMap *ro) {
+  ZoneScopedN("DataBlock::loadFromBinDump");
   unsigned blkFlags = shared ? shared->blkFlags : 0;
   deleteShared();
 

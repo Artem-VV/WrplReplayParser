@@ -5,6 +5,7 @@
 #include "modules/ecs/EntityManager.h"
 #include "modules/ecs/GState.h"
 #include "modules/replay/replay.h"
+#include "mpi/codegen/mpiUiStubs.h"
 
 PYBIND11_MODULE(PyReplayParser, m) {
   py_replay.include(m);

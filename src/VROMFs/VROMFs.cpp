@@ -25,6 +25,7 @@ void VromfsFile::Save(std::ofstream *cb) {
 bool VromfsFile::loadBlk(DataBlock &blk) { return this->asIndex()->owner->parseFileToDatablock(*this, blk); }
 
 int64_t VromfsFile::read_impl(void *ptr, size_t length) {
+  ZoneScopedN("VromfsFile::read_impl");
   auto data = this->readRaw();
   if (data.empty())
     return -1;

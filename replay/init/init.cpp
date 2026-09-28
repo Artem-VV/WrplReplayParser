@@ -10,6 +10,8 @@
 #include "translate.h"
 #include "res/grpManager.h"
 
+size_t get_state_pulls();
+
 namespace mpi {
   class BaseListener : public IMessageListener {
   public:
@@ -85,7 +87,7 @@ void initialize(const std::string &game_path, const std::string &grp_dir, const 
   G_ASSERT(dblk::load(ecs::g_ecs_data->wp_cost, "config/wpcost.blk"));
   G_ASSERT(dblk::load(ecs::g_ecs_data->unit_tags, "config/unittags.blk"));
   // mpi::players.hello();
-  size_t pull_val = framework_primary_pulls;
+  size_t pull_val = get_state_pulls();
   G_UNUSED(pull_val);
   LOGI("init finished");
 }
