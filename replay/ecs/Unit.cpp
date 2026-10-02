@@ -116,7 +116,7 @@ namespace unit {
 
   const char *Aircraft::getUnitTypeName() { return "Aircraft"; }
 
-  std::array<weap, 18> weapon_id_match = {{{0, "machine gun"},
+  std::array<weap, 19> weapon_id_match = {{{0, "machine gun"},
                                            {1, "cannon"},
                                            {2, "additional gun"},
                                            {0x3, "rockets"},
@@ -131,9 +131,10 @@ namespace unit {
                                            {0xc, "undercarriage"},
                                            {0xd, "airdrops"},
                                            {0xe, "countermeasures"},
-                                           {0x12, "targetingPod"},
-                                           {0xf, "special gun"},
-                                           {0x10, "smoke"}}};
+                                           {0xf, "towed decoys"},
+                                           {0x10, "special gun"},
+                                           {0x11, "smoke"},
+                                           {0x12, "targetingPod"}}};
 
   constexpr int GUNNER_WEAPON_ID_BASE = 0x13;
 
