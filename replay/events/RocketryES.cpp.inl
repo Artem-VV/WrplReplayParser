@@ -73,7 +73,7 @@ template<typename Callable>
 static void iterate_all_rockets_ecs_query(ecs::EntityManager &manager, Callable c);
 
 namespace unit {
-  void buildBallisticArc(Rocket &store, bool powered, float sea_level);
+  void buildBallisticArc(ParserState &state, Rocket &store, bool powered, float sea_level);
 }
 
 // The collectors below return every store the battle created, tracked or not.
@@ -83,8 +83,8 @@ namespace unit {
 // dropping it here would throw away the only record of it.
 std::vector<Rocket *> collect_all_rockets(ParserState &state) {
   std::vector<Rocket *> rockets;
-  iterate_all_rockets_ecs_query(state.g_entity_mgr, [&rockets, sea = state.sea_level](Rocket &rocket_component) {
-    unit::buildBallisticArc(rocket_component, /*powered*/ true, sea);
+  iterate_all_rockets_ecs_query(state.g_entity_mgr, [&rockets, &state](Rocket &rocket_component) {
+    unit::buildBallisticArc(state, rocket_component, /*powered*/ true, state.sea_level);
     rockets.push_back(&rocket_component);
   });
   return rockets;
@@ -125,8 +125,8 @@ static void iterate_all_jettisoned_ecs_query(ecs::EntityManager &manager, Callab
 std::vector<Jettisoned *> collect_all_jettisoned(ParserState &state) {
   std::vector<Jettisoned *> jettisoned;
   iterate_all_jettisoned_ecs_query(state.g_entity_mgr,
-                                   [&jettisoned, sea = state.sea_level](Jettisoned &jettisoned_component) {
-    unit::buildBallisticArc(jettisoned_component, /*powered*/ false, sea);
+                                   [&jettisoned, &state](Jettisoned &jettisoned_component) {
+    unit::buildBallisticArc(state, jettisoned_component, /*powered*/ false, state.sea_level);
     jettisoned.push_back(&jettisoned_component);
   });
   return jettisoned;
@@ -137,8 +137,8 @@ static void iterate_all_bombs_ecs_query(ecs::EntityManager &manager, Callable c)
 
 std::vector<Bomb *> collect_all_bombs(ParserState &state) {
   std::vector<Bomb *> bombs;
-  iterate_all_bombs_ecs_query(state.g_entity_mgr, [&bombs, sea = state.sea_level](Bomb &bomb_component) {
-    unit::buildBallisticArc(bomb_component, /*powered*/ true, sea);
+  iterate_all_bombs_ecs_query(state.g_entity_mgr, [&bombs, &state](Bomb &bomb_component) {
+    unit::buildBallisticArc(state, bomb_component, /*powered*/ true, state.sea_level);
     bombs.push_back(&bomb_component);
   });
   return bombs;

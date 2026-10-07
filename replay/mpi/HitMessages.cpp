@@ -24,8 +24,7 @@ namespace mpi {
     template<typename T>
     bool raw_at(const BitStream &bs, uint32_t offset, T &out) {
       bs.SetReadOffset(BYTES_TO_BITS(offset));
-      if (!bs.Read(out))
-        return false;
+      return bs.Read(out);
     }
 
     // netutils::read_idx is a plain LEB128, not the danet compressed form. Its
@@ -108,7 +107,6 @@ namespace mpi {
       // Only the point and the first direction are published; the rest is read to
       // reach the end of the body, which is what proves the layout is right.
       int skip_i = 0;
-      float skip_f = 0.f;
       Point3 unused_dir{};
       bool skip_b = false;
       bool ok = body.ReadZigZag(skip_i);
