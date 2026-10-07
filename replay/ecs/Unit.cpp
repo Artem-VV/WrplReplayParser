@@ -251,19 +251,19 @@ namespace unit {
     // files rules that out.
     for (int depth = 0; depth < 8; ++depth) {
       DataBlock inner{};
-      if (!dblk::load(inner, out, dblk::ReadFlags(dblk::ReadFlag::ROBUST)) ||
-          !inner.getBool("container", false))
+      if (!dblk::load(inner, out, dblk::ReadFlags(dblk::ReadFlag::ROBUST)) || !inner.getBool("container", false))
         break;
       auto next = inner.getStr("blk", nullptr);
       if (!next || out == next)
         break;
       out = next;
     }
-    //resolved.emplace(blk_val, out);
+    // resolved.emplace(blk_val, out);
     return out;
   }
 
-  Weapon::Weapon(const DataBlock *blk, Unit *unit, std::vector<uint16_t> &weapons_count, ParserState * state) : state(state) {
+  Weapon::Weapon(const DataBlock *blk, Unit *unit, std::vector<uint16_t> &weapons_count, ParserState *state) :
+    state(state) {
     auto trigger = blk->getStr("trigger", nullptr);
     auto blk_str = blk->getStr("blk", nullptr);
     auto _emitter = blk->getStr("emitter", nullptr);
@@ -439,7 +439,6 @@ namespace unit {
       std::vector<LauncherInfo> launchers{}; // thats what they technically are idduno deal with it
       // blkPrint(weapon_preset);
       for (int i = 0; i < weapon_preset->blockCount(); i++) {
-        auto curr_preset = weapon_preset->getBlock(i);
         const DataBlock *curr_weapon_slot = nullptr, *curr_weapon_preset = nullptr;
         int tier = -1;
         int slot = -1;
@@ -460,14 +459,14 @@ namespace unit {
                        [](const LauncherInfo &f, const LauncherInfo &s) { return f.order < s.order; });
       this->weapons.reserve(launchers.size());
       for (auto &launcher: launchers) {
-        this->weapons.emplace_back(launcher.blk, this, weapons_count);
+        this->weapons.emplace_back(launcher.blk, this, weapons_count, state);
       }
     } else {
       int WeaponNid = weapon_preset->getNameId("Weapon"), weaponNid = weapon_preset->getNameId("weapon");
       for (int i = 0; i < weapon_preset->blockCount(); i++) {
         auto curr_preset = weapon_preset->getBlock(i);
         if (curr_preset->getBlockNameId() == WeaponNid || curr_preset->getBlockNameId() == weaponNid) {
-          this->weapons.emplace_back(curr_preset, this, weapons_count);
+          this->weapons.emplace_back(curr_preset, this, weapons_count, state);
         }
       }
     }
