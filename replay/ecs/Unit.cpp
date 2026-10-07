@@ -245,14 +245,7 @@ namespace unit {
     // leaves the first level as the container itself: the Pantsir's TKB-1055 stayed
     // 170mm_tkb_1055_container, which has no name of its own and no turret.
     //
-    // Every weapon of every unit comes through here, so the resolved path is cached:
-    // without it the same blk is loaded once per weapon, and twice for a pilon slot,
-    // which is read once for the dedup and again by the Weapon ctor.
-    static std::unordered_map<std::string, std::string> resolved;
-    const auto hit = resolved.find(blk_val);
-    if (hit != resolved.end())
-      return hit->second;
-
+    // readd caching if needed
     std::string out = blk_val;
     // A container pointing at itself would recurse forever, and nothing in the game
     // files rules that out.
@@ -266,7 +259,7 @@ namespace unit {
         break;
       out = next;
     }
-    resolved.emplace(blk_val, out);
+    //resolved.emplace(blk_val, out);
     return out;
   }
 
@@ -510,7 +503,7 @@ namespace unit {
               seen |= w.from_pilon && w.blk_path == path;
             if (seen)
               continue;
-            this->weapons.emplace_back(weap, this, weapons_count);
+            this->weapons.emplace_back(weap, this, weapons_count, state);
             // The ctor can bail out and still leave the object in the vector. Marking
             // such a weapon as a pilon one would make it the fallback of
             // getWeaponFromRef for every unresolved ref of this vehicle, handing out a
