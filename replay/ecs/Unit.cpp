@@ -270,7 +270,7 @@ namespace unit {
     return out;
   }
 
-  Weapon::Weapon(const DataBlock *blk, Unit *unit, std::vector<uint16_t> &weapons_count) {
+  Weapon::Weapon(const DataBlock *blk, Unit *unit, std::vector<uint16_t> &weapons_count, ParserState * state) : state(state) {
     auto trigger = blk->getStr("trigger", nullptr);
     auto blk_str = blk->getStr("blk", nullptr);
     auto _emitter = blk->getStr("emitter", nullptr);
