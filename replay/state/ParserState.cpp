@@ -2,6 +2,26 @@
 #include "ecs/entityId.h"
 #include "mpi/PositionSync.h"
 #include "utils.h"
+#include "ioSys/dag_dataBlock.h"
+
+namespace {
+  // warthunder offsets all y offsets by the sea level. on most maps, this is 0, but some, like Pradesh, have a difference (last seen as 920)
+  float read_sea_level(const char *level_path) {
+    if (!level_path || !*level_path)
+      return 0.f;
+    std::string stem = level_path;
+    const size_t slash = stem.find_last_of("/\\");
+    if (slash != std::string::npos)
+      stem = stem.substr(slash + 1);
+    const size_t dot = stem.find_last_of('.');
+    if (dot != std::string::npos)
+      stem = stem.substr(0, dot);
+    DataBlock blk;
+    if (!dblk::load(blk, fmt::format("levels/{}.blk", stem), dblk::ReadFlag::ROBUST))
+      return 0.f;
+    return blk.getReal("water_level", 0.f);
+  }
+} // namespace
 
 bool ChatMessage::FromBS(BitStream &bs) {
   bool ok = true;
@@ -21,6 +41,7 @@ ParserState::ParserState(IReplay *replay) {
   if (!header)
     EXCEPTION("Invalid Replay: header is not available");
   initialize(header->player_count);
+  this->sea_level = read_sea_level(header->level_path);
 }
 void ParserState::initialize(uint32_t player_count) {
   G_ASSERT(this->players.size() == 0);

@@ -94,6 +94,10 @@ public:
   virtual void onEnd() = 0;
 };
 
+namespace unit {
+  class Unit;
+}
+
 namespace danet {
   class ReflectionVarMeta;
 
