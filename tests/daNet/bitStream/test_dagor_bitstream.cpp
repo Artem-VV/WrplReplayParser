@@ -84,8 +84,11 @@ TEST_CASE("Test multiple strings read/write identity", "[bitstream][string]") {
   danet::BitStream bs;
 
   eastl::string foo[4];
-  for (int i = 0; i < countof(foo); ++i)
-    foo[i] = eastl::string(eastl::string::CtorSprintf(), "%s%d", __FUNCTION__, i);
+  for (int i = 0; i < countof(foo); ++i) {
+    char value[128];
+    snprintf(value, sizeof(value), "%s%d", __FUNCTION__, i);
+    foo[i] = value;
+  }
   bs.Write(foo);
 
   eastl::string bar[countof(foo)];

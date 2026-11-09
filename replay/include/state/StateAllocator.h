@@ -39,6 +39,8 @@ class StateAllocator : public std::pmr::memory_resource {
     void *allocAligned(size_t sz, size_t alignment) override {
 #if USE_MI_HEAP == 1
       return mi_heap_malloc_aligned(heap, sz, alignment);
+#elif defined(_WIN32)
+      return _aligned_malloc(sz, alignment);
 #else
       return ::aligned_alloc(alignment, sz);
 #endif
@@ -67,6 +69,8 @@ class StateAllocator : public std::pmr::memory_resource {
     void freeAligned(void *p) override {
 #if USE_MI_HEAP == 1
       mi_free(p);
+#elif defined(_WIN32)
+      _aligned_free(p);
 #else
       return ::free(p);
 #endif

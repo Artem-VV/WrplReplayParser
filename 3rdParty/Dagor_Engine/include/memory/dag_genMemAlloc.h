@@ -10,6 +10,9 @@
 #endif
 
 #include "stdlib.h"
+#if defined(_WIN32)
+#include <malloc.h>
+#endif
 #include "cstdint"
 #include "dag_memBase.h"
 
@@ -40,13 +43,18 @@ struct GLOBAL_ALLOC : public IMemAlloc {
   void freeAligned(void *p) override {
 #if USE_MI_HEAP == 1
     return mi_free(p);
-#endif
+#elif defined(_WIN32)
+    return _aligned_free(p);
+#else
     return free(p);
+#endif
   }
 
   void *allocAligned(size_t n, size_t al) override {
 #if USE_MI_HEAP == 1
     return mi_malloc_aligned(n, al);
+#elif defined(_WIN32)
+    return _aligned_malloc(n, al);
 #else
     return ::aligned_alloc(al, n);
 #endif

@@ -2,6 +2,7 @@
 #include "dag_assert.h"
 #define BITSTREAM_TESTS
 #include "daNet/bitStream.h"
+#include "state/StateAllocator.h"
 #include "daNet/daNetTypes.h"
 #include "math/dag_Point3.h"
 #include <catch2/catch_test_macros.hpp>
@@ -110,3 +111,33 @@ LOGI("read8: {}", read8);
 Point3 read_point{};
 G_CHECK(bs.Read(read_point));
 LOGI("read_point: {}; {}; {}", read_point[0], read_point[1], read_point[2]);*/
+
+TEST_CASE("BitStream growth preserves written data", "[bitstream][allocator]") {
+  danet::BitStream stream;
+  stream.Write(uint8_t{0xA5});
+  std::array<uint8_t, 256> payload{};
+  payload.fill(0x5A);
+  stream.WriteBits(payload.data(), BYTES_TO_BITS(payload.size()));
+
+  uint8_t first = 0;
+  REQUIRE(stream.Read(first));
+  CHECK(first == 0xA5);
+  for (auto expected : payload) {
+    uint8_t actual = 0;
+    REQUIRE(stream.Read(actual));
+    CHECK(actual == expected);
+  }
+  CHECK(stream.GetNumberOfUnreadBits() == 0);
+}
+
+TEST_CASE("Allocator aligned buffers use paired release", "[allocator]") {
+  GLOBAL_ALLOC global;
+  StateAllocator state;
+  for (IMemAlloc *allocator : std::array<IMemAlloc *, 2>{&global, state.getMem()}) {
+    void *buffer = allocator->allocAligned(256, 64);
+    REQUIRE(buffer != nullptr);
+    CHECK(reinterpret_cast<uintptr_t>(buffer) % 64 == 0);
+    memset(buffer, 0xA5, 256);
+    allocator->freeAligned(buffer);
+  }
+}

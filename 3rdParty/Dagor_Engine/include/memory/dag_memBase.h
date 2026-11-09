@@ -115,8 +115,8 @@ DECL_MEM(globmem);
 DECL_MEM(defaultmem); //< memory used by default (in operator new)
 
 /// C-style functions to provide allocation/deallocation
-__forceinline void *memalloc(size_t sz, IMemAlloc *a) { return a->alloc(sz); }
-__forceinline void *memalloc(size_t sz, IMemAlloc *a, size_t *asz) { return a->alloc(sz, asz); }
+inline void *memalloc(size_t sz, IMemAlloc *a) { return a->alloc(sz); }
+inline void *memalloc(size_t sz, IMemAlloc *a, size_t *asz) { return a->alloc(sz, asz); }
 
 /// special helper to allocate memory for typed array of 'cnt' items
 template<class T>
@@ -124,4 +124,4 @@ inline T *memalloc_typed(size_t cnt, IMemAlloc *a) {
   return (T *) a->alloc(cnt * sizeof(T));
 }
 
-__forceinline void memfree(void *p, IMemAlloc *a) { a->free(p); }
+inline void memfree(void *p, IMemAlloc *a) { a->free(p); }

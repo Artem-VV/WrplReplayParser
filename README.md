@@ -25,3 +25,18 @@ ADD COMMENTS
 ensure LICENCE is correctly setup
 
 tests
+
+## wtapi builds
+
+Set `CMAKE_CXX_FLAGS=-DUSE_MI_HEAP=0` and `MI_OVERRIDE=OFF` in the inherited
+`FLAGS` of the local `cmake-build/cmake_config.json`. BitStream uses
+`malloc/realloc`, so its buffers must be freed by the same C runtime.
+Rebuild all C++ objects when changing allocator flags.
+
+Enable native tests with `-DPARSER_ENABLE_TESTS=ON`, build `test_bitstream`
+and `test_rle`, then run `ctest --output-on-failure` in the build directory.
+
+Build Linux x86_64/Python 3.12 in WSL Ubuntu 24.04 and Windows with MinGW.
+The `PyReplayParser` install component writes to
+`cmake-build/binaries/artifacts/PyReplayParser/`; keep `signal_tracer`
+next to the Linux module.

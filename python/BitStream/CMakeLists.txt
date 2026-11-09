@@ -1,4 +1,4 @@
-add_library(PyBitStream BitStream.cpp)
+add_library(PyBitStream bitStream.cpp)
 
 target_link_libraries(PyBitStream;
         pybind11::module
