@@ -1,6 +1,10 @@
 #include <chrono>
 #include <iostream>
 #include <thread>
+#if defined(__linux__) && defined(__GLIBC__)
+#include <malloc.h>
+#include <stdexcept>
+#endif
 #include "FileSystem.h"
 #include "ecs/componentTypesDefs.h"
 #include "init/initialize.h"
@@ -38,6 +42,11 @@ void initialize(const std::string &game_path, const std::string &grp_dir, const 
                 bool lang, bool mis) {
   if (has_init)
     return;
+#if defined(__linux__) && defined(__GLIBC__)
+  // Disable the adaptive threshold so large replay buffers can return to the OS.
+  if (mallopt(M_MMAP_THRESHOLD, 128 * 1024) == 0)
+    throw std::runtime_error("Failed to configure the replay parser allocator");
+#endif
   g_log_handler.initialize();
   LOGI("init started");
   has_init = true;

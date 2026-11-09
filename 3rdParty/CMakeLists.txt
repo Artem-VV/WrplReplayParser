@@ -1,11 +1,7 @@
 include(FetchContent)
 
-mimalloc_enable_sanitizer_options()
-add_subdirectory(mimalloc-3.3.2)
-
 add_subdirectory(arc)
 add_subdirectory(eastl)
-# add_subdirectory(mimalloc)
 add_subdirectory(hash)
 add_subdirectory(enet)
 add_subdirectory(fmt-12.1.0)
