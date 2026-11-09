@@ -224,15 +224,29 @@ namespace unit {
     return payload;
   }
 
-  void TurretDesc::push_curr_state(ParserState &state) {
+  void TurretDesc::push_curr_state(TurretHistory::Encoder &encoder) {
     ZoneScopedN("TurretDesc::push_curr_state");
     TurretData data{};
     data.rel = head->turret_rel;
     data.abs = head->turret_abs;
     data.gun_rel = gun->turret_rel;
     data.gun_abs = gun->turret_abs;
-    *turret_state.reserveOne() = data;
-    turret_state.checkAndPush(&state);
+    turret_state.push(data, encoder);
+  }
+
+  void Unit::recordTurretData(ParserState &state) {
+    // Every mount uses the same packet grid; one rewind entry advances all of them.
+    bool recorded = false;
+    for (auto &weapon: weapons) {
+      if (weapon.turret_desc) {
+        weapon.turret_desc->push_curr_state(state.turret_encoder);
+        recorded = true;
+      }
+    }
+    if (recorded) {
+      *turret_clock.reserveOne() = turret_clock.history().size();
+      turret_clock.checkAndPush(&state);
+    }
   }
 
   std::string parse_weapon_container(const DataBlock *blk) {
@@ -292,11 +306,11 @@ namespace unit {
 
     weapons_count[weapon_id]++;
     if (unit->hasTree()) {
-      this->loadTurretData(blk, unit->turret_tree.get());
+      this->loadTurretData(blk, unit->turret_tree.get(), unit->turret_clock);
     }
   }
 
-  void Weapon::loadTurretData(const DataBlock *weap_blk, TurretTree *tree) {
+  void Weapon::loadTurretData(const DataBlock *weap_blk, TurretTree *tree, const TurretClock &clock) {
     auto turret_blk = weap_blk->getBlockByName("turret");
     if (!turret_blk)
       return;
@@ -309,7 +323,7 @@ namespace unit {
     auto gun_node = tree->getUsefulNode(gun_str);
     if (!head_node || !gun_node)
       return;
-    turret_desc = std::make_unique<TurretDesc>(head_node, gun_node);
+    turret_desc = std::make_unique<TurretDesc>(head_node, gun_node, clock);
   }
 
   void Unit::loadWeaponData(const std::string &path) {
@@ -524,7 +538,7 @@ namespace unit {
   void Unit::loadTurretData(Weapon &weapon, const DataBlock *weap_blk) {
     if (!this->has_tree)
       return;
-    weapon.loadTurretData(weap_blk, this->turret_tree.get());
+    weapon.loadTurretData(weap_blk, this->turret_tree.get(), this->turret_clock);
   }
 
   bool unit::Unit::LoadFromStorage(const FieldSerializerDict &data) {

@@ -1,5 +1,7 @@
 #include <pybind11/functional.h>
 #include "modules/State.h"
+#include "Unit.h"
+#include <unordered_map>
 #include "modules/bind_readonly_vector.h"
 #include "modules/bind_rewind_state.h"
 #include "modules/mpi/battle_messages.h"
@@ -111,8 +113,7 @@ void PyReplayState::include(py::module_ &m) {
     .def_readonly("current_packet_index", &ParserState::current_packet_index)
     .def_readonly("chat_messages", &ParserState::chatMessages)
     .def_readonly("battle_messages", &ParserState::BattleMessages)
-    .def_readonly("hit_effects", &ParserState::HitEffects,
-                  "0xF0E9, one record per hit including harmless ones")
+    .def_readonly("hit_effects", &ParserState::HitEffects, "0xF0E9, one record per hit including harmless ones")
     .def_readonly("hit_analysis", &ParserState::HitAnalyses,
                   "0xF15F, hit camera record; sent twice per hit and not for every hit")
     .def_readonly("hit_damage", &ParserState::HitDamages,
@@ -127,8 +128,51 @@ void PyReplayState::include(py::module_ &m) {
                   "Rounds left in a barrel: 0xF0BD for a ground vehicle, the aircraft sync for a plane. "
                   "A step down is that many rounds fired. The aircraft one rides every update, so values "
                   "repeat; a ground vehicle only sends it on a change.")
-    .def_readonly("shots", &ParserState::ShotEvents,
-                  "0xF0B1 single shot, 0xF01B / 0xF01C trigger down and up")
+    .def(
+      "ammo_event_channels",
+      [](py::object owner) {
+        const auto &events = owner.cast<ParserState &>().AmmoEvents;
+        py::dict result;
+        if (events.empty())
+          return result;
+        py::array_t<int32_t> unit_index(events.size());
+        auto *indices = unit_index.mutable_data();
+        std::vector<unit::Unit *> units;
+        {
+          py::gil_scoped_release release;
+          std::unordered_map<unit::Unit *, int32_t> indexed;
+          for (size_t i = 0; i < events.size(); ++i) {
+            auto *unit = events[i].unit;
+            if (!unit) {
+              indices[i] = -1;
+              continue;
+            }
+            auto [it, inserted] = indexed.try_emplace(unit, static_cast<int32_t>(units.size()));
+            if (inserted)
+              units.push_back(unit);
+            indices[i] = it->second;
+          }
+        }
+        py::list unit_objects;
+        for (auto *unit: units)
+          unit_objects.append(py::cast(unit, py::return_value_policy::reference_internal, owner));
+        py::detail::array_proxy(unit_index.ptr())->flags &= ~py::detail::npy_api::NPY_ARRAY_WRITEABLE_;
+        const auto *base = events.data();
+        const size_t count = events.size();
+        result["time_ms"] = channel_view(base, &base->time_ms, count, owner);
+        result["barrel"] = channel_view(base, &base->barrel, count, owner);
+        result["slot"] = channel_view(base, &base->slot, count, owner);
+        result["rounds_left"] = channel_view(base, &base->rounds_left, count, owner);
+        result["unit_index"] = std::move(unit_index);
+        result["units"] = std::move(unit_objects);
+        return result;
+      },
+      "Read-only ammo arrays in event order; empty dict for an empty log. "
+      "time_ms and rounds_left are uint32, barrel and slot uint8. "
+      "unit_index is int32: an index into units, or -1 for a missing unit. "
+      "Numeric fields are zero-copy views retaining this state; unit_index owns its buffer. "
+      "Call after parsing and do not append events while using the views.")
+    .def_readonly("shots", &ParserState::ShotEvents, "0xF0B1 single shot, 0xF01B / 0xF01C trigger down and up")
     .def(
       "LoadFromReader",
       [](ParserState &state, IReplayReader &rdr, const std::function<void(ReplayPacket *)> &func) {
@@ -178,13 +222,24 @@ void PyReplayState::include(py::module_ &m) {
         // if its another thread, then my segfault handler will catch it and print the stacktrace
       },
       py::arg("reader"), py::arg("callback") = nullptr)
-    .def("collect_all_units", [](ParserState &state) { return collect_all_units(state); })
-    .def("collect_all_rockets", [](ParserState &state) { return collect_all_rockets(state); })
-    .def("collect_all_bombs", [](ParserState &state) { return collect_all_bombs(state); })
-    .def("collect_all_payloads", [](ParserState &state) { return collect_all_payloads(state); })
-    .def("collect_all_torpedoes", [](ParserState &state) { return collect_all_torpedoes(state); })
-    .def("collect_all_jettisoned",
-         [](ParserState &state) { return collect_all_jettisoned(state); });
+    .def(
+      "collect_all_units", [](ParserState &state) { return collect_all_units(state); },
+      py::return_value_policy::reference_internal)
+    .def(
+      "collect_all_rockets", [](ParserState &state) { return collect_all_rockets(state); },
+      py::return_value_policy::reference_internal)
+    .def(
+      "collect_all_bombs", [](ParserState &state) { return collect_all_bombs(state); },
+      py::return_value_policy::reference_internal)
+    .def(
+      "collect_all_payloads", [](ParserState &state) { return collect_all_payloads(state); },
+      py::return_value_policy::reference_internal)
+    .def(
+      "collect_all_torpedoes", [](ParserState &state) { return collect_all_torpedoes(state); },
+      py::return_value_policy::reference_internal)
+    .def(
+      "collect_all_jettisoned", [](ParserState &state) { return collect_all_jettisoned(state); },
+      py::return_value_policy::reference_internal);
 }
 
 PyReplayState py_replay_state{};

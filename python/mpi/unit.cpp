@@ -103,52 +103,88 @@ void PyUnit::include(py::module_ &m) {
     .def_readonly("gun_rel", &unit::TurretData::gun_rel)
     .def_readonly("gun_abs", &unit::TurretData::gun_abs);
 
-  py::class_<ObjectRewindState<unit::TurretData, false, false, false>::TimeState>(m, "TurretDataTS")
-    .def_readonly("time_ms", &ObjectRewindState<unit::TurretData, false, false, false>::TimeState::time_ms)
-    .def_readonly("value", &ObjectRewindState<unit::TurretData, false, false, false>::TimeState::data);
+  py::class_<unit::TurretHistory::TimeState>(m, "TurretDataTS")
+    .def_readonly("time_ms", &unit::TurretHistory::TimeState::time_ms)
+    .def_readonly("value", &unit::TurretHistory::TimeState::data);
 
-  bind_readonly_vector<dag::Vector<ObjectRewindState<unit::TurretData, false, false, false>::TimeState>>(
+  bind_readonly_vector<unit::TurretHistory::View, unit::TurretHistory::View, py::return_value_policy::copy>(
     m, "TurretDataTSList");
 
-
-  bind_rewind_state<ObjectRewindState<unit::TurretData, false, false, false>>(m, "TurretDataHistory")
+  bind_rewind_state<unit::TurretHistory>(m, "TurretDataHistory")
     .def(
       "channels",
-      [](py::object self_py) {
-        auto &self = self_py.cast<ObjectRewindState<unit::TurretData, false, false, false> &>();
-        auto &v = self.history();
-        py::dict d;
-        if (v.empty())
-          return d;
-        const auto *b = v.data();
-        const size_t n = v.size();
-        d["time_ms"] = channel_view(b, &b->time_ms, n, self_py);
-        d["yaw"] = channel_view(b, &b->data.abs.x, n, self_py);
-        d["pitch"] = channel_view(b, &b->data.abs.y, n, self_py);
-        d["roll"] = channel_view(b, &b->data.abs.z, n, self_py);
-        d["rel_yaw"] = channel_view(b, &b->data.rel.x, n, self_py);
-        d["rel_pitch"] = channel_view(b, &b->data.rel.y, n, self_py);
-        d["rel_roll"] = channel_view(b, &b->data.rel.z, n, self_py);
-        d["gun_yaw"] = channel_view(b, &b->data.gun_abs.x, n, self_py);
-        d["gun_pitch"] = channel_view(b, &b->data.gun_abs.y, n, self_py);
-        d["gun_roll"] = channel_view(b, &b->data.gun_abs.z, n, self_py);
-        d["gun_rel_yaw"] = channel_view(b, &b->data.gun_rel.x, n, self_py);
-        d["gun_rel_pitch"] = channel_view(b, &b->data.gun_rel.y, n, self_py);
-        d["gun_rel_roll"] = channel_view(b, &b->data.gun_rel.z, n, self_py);
-        return d;
+      [](py::object self_py, py::object requested) {
+        auto &self = self_py.cast<unit::TurretHistory &>();
+        py::dict result;
+        const size_t count = self.size();
+        if (!count)
+          return result;
+        struct Field {
+          const char *name;
+          float (*read)(const unit::TurretData &);
+        };
+        static constexpr Field fields[] = {
+          {"yaw", +[](const unit::TurretData &v) { return v.abs.x; }},
+          {"pitch", +[](const unit::TurretData &v) { return v.abs.y; }},
+          {"roll", +[](const unit::TurretData &v) { return v.abs.z; }},
+          {"rel_yaw", +[](const unit::TurretData &v) { return v.rel.x; }},
+          {"rel_pitch", +[](const unit::TurretData &v) { return v.rel.y; }},
+          {"rel_roll", +[](const unit::TurretData &v) { return v.rel.z; }},
+          {"gun_yaw", +[](const unit::TurretData &v) { return v.gun_abs.x; }},
+          {"gun_pitch", +[](const unit::TurretData &v) { return v.gun_abs.y; }},
+          {"gun_roll", +[](const unit::TurretData &v) { return v.gun_abs.z; }},
+          {"gun_rel_yaw", +[](const unit::TurretData &v) { return v.gun_rel.x; }},
+          {"gun_rel_pitch", +[](const unit::TurretData &v) { return v.gun_rel.y; }},
+          {"gun_rel_roll", +[](const unit::TurretData &v) { return v.gun_rel.z; }},
+        };
+        std::array<bool, 12> selected{};
+        if (requested.is_none()) {
+          selected.fill(true);
+        } else {
+          for (py::handle field: requested) {
+            auto name = py::cast<std::string>(field);
+            size_t i = 0;
+            while (i < selected.size() && name != fields[i].name)
+              ++i;
+            if (i == selected.size())
+              throw py::key_error(name);
+            selected[i] = true;
+          }
+        }
+        const auto *timestamps = self.clock().history().data() + self.firstFrame();
+        result["time_ms"] = channel_view(timestamps, &timestamps->time_ms, count, self_py);
+        std::array<float *, 12> output{};
+        for (size_t i = 0; i < selected.size(); ++i) {
+          if (!selected[i])
+            continue;
+          py::array_t<float> values(count);
+          output[i] = values.mutable_data();
+          py::detail::array_proxy(values.ptr())->flags &= ~py::detail::npy_api::NPY_ARRAY_WRITEABLE_;
+          result[fields[i].name] = std::move(values);
+        }
+        {
+          py::gil_scoped_release release;
+          std::array<unit::TurretData, unit::TurretHistory::BLOCK_SAMPLES> decoded;
+          size_t offset = 0;
+          for (size_t block = 0; block < self.blockCount(); ++block) {
+            const size_t n = self.readBlock(block, decoded.data());
+            for (size_t field = 0; field < output.size(); ++field) {
+              if (!output[field])
+                continue;
+              for (size_t row = 0; row < n; ++row)
+                output[field][offset + row] = fields[field].read(decoded[row]);
+            }
+            offset += n;
+          }
+        }
+        return result;
       },
-      "All samples as read-only zero-copy numpy views over the history buffer.\n"
-      "Empty dict when the history is empty, otherwise every array has the same length.\n"
-      "Keys: time_ms (uint32, ms); then float32 radians, in yaw/pitch/roll order:\n"
-      "yaw, pitch, roll - turret node (head), absolute;\n"
-      "rel_yaw, rel_pitch, rel_roll - turret node, relative to its parent node;\n"
-      "gun_yaw, gun_pitch, gun_roll - gun node, absolute;\n"
-      "gun_rel_yaw, gun_rel_pitch, gun_rel_roll - gun node, relative to the turret.\n"
-      "Absolute values are the sum of the parent absolute and the relative one, per axis,\n"
-      "with the hull as the tree root: turret traverse = yaw - hull yaw,\n"
-      "gun elevation = gun_pitch - pitch. Only yaw, pitch and gun_pitch carry new data,\n"
-      "the rest duplicate the hull or the turret.");
-
+      py::arg("fields") = py::none(),
+      "All samples as read-only arrays. time_ms is a uint32 zero-copy view retaining the history; "
+      "float32 angle arrays are decoded losslessly from compressed blocks. "
+      "fields selects angle channels; None returns all twelve. Empty history returns {}. "
+      "Angles: yaw/pitch/roll and gun_yaw/gun_pitch/gun_roll are absolute; "
+      "rel_* and gun_rel_* are relative to their parent nodes.");
 
   py::class_<unit::TurretDesc, std::unique_ptr<unit::TurretDesc, py::nodelete>>(unit, "TurretDesc")
     .def_readonly("turret_state", &unit::TurretDesc::turret_state);

@@ -16,6 +16,7 @@
 #include "memory/dag_memBase.h"
 #include "mpi/Ballistics.h"
 #include "blockAllocator.h"
+#include "turretHistory.h"
 namespace unit {
   class Unit;
 }
@@ -131,6 +132,8 @@ protected:
   friend IObjectRewindState;
 
 public:
+  // Owned by the parse: MinGW can free emulated TLS before its C++ destructors run.
+  unit::TurretHistory::Encoder turret_encoder{};
   UnitAllocator<unit::Aircraft, unit::Tank> _unit_allocator{allocator.getMem()};
   template<class T, class... Args>
   T *_new(Args &&...args) {

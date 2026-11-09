@@ -15,6 +15,7 @@ add_library(dagECS
         EventsDB.cpp
         EntityManagerQuery.cpp
         Unit.cpp
+        TurretHistory.cpp
         shared_mutex.cpp
 )
 
@@ -22,6 +23,7 @@ add_library(dagECS
 target_link_libraries(dagECS
         # Unit.cpp builds the hit and shot message types, so it needs MPI after itself
         MPI::MPI
+        ZSTD::ZSTD
         FieldSerializer::FieldSerializer
         dagBlk::dagBlk
         FS::FS

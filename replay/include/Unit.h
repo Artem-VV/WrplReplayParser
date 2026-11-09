@@ -12,6 +12,7 @@
 #include "mpi/types.h"
 #include "mpi/codegen/ReflIncludes.h"
 #include "state/StateRewinder.h"
+#include "turretHistory.h"
 #include "math/dag_mathAng.h"
 
 struct SpaceTime {
@@ -182,21 +183,13 @@ namespace unit {
     std::string name{};
   };
 
-  struct TurretData {
-    Point3 rel;
-    Point3 abs;
-    Point3 gun_rel;
-    Point3 gun_abs;
-
-    bool operator==(const TurretData &other) const {
-      return rel == other.rel && abs == other.abs && gun_rel == other.gun_rel && gun_abs == other.gun_abs;
-    }
-  };
-
   struct TurretDesc {
     TurretNode *head;
     TurretNode *gun;
-    ObjectRewindState<TurretData, false, false, false> turret_state{};
+    TurretHistory turret_state;
+
+    TurretDesc(TurretNode *head, TurretNode *gun, const TurretClock &clock) :
+      head(head), gun(gun), turret_state(clock) {}
 
     void setData(Point3 turret_info) {
       head->turret_abs = {};
@@ -205,7 +198,7 @@ namespace unit {
       gun->turret_rel.y = turret_info.y;
     }
 
-    void push_curr_state(ParserState &state);
+    void push_curr_state(TurretHistory::Encoder &encoder);
   };
 
   struct Weapon {
@@ -230,7 +223,7 @@ namespace unit {
     /// it is the Unit::storage_weapons line naming one of these by BulletSet::name.
     const std::vector<BulletSet> &bulletSets() const;
 
-    void loadTurretData(const DataBlock *weapon_blk, TurretTree *tree);
+    void loadTurretData(const DataBlock *weapon_blk, TurretTree *tree, const TurretClock &clock);
   };
 
   class Unit {
@@ -262,6 +255,7 @@ namespace unit {
     Weapon *getWeapon(uint16_t idx);
     Weapon *getWeaponFromRef(uint32_t ref);
     void calculateTurretData();
+    void recordTurretData(ParserState &state);
 
     std::vector<std::string> getTags() const { return getUnitTagsBlk(unit_tags); }
 
@@ -292,6 +286,7 @@ namespace unit {
     std::vector<weapon_data> storage_weapons{};
     std::vector<std::string> weapon_mods{};
     std::vector<std::string> fm_mods{};
+    TurretClock turret_clock{};
     std::vector<Weapon> weapons{};
     ObjectRewindState<SpaceTimeEuler, false, false, false> positions{};
 

@@ -604,9 +604,8 @@ bool ParseVehicleInfo(ParserState &state, danet::BitStream &bs, TankRef *ref, bo
   uint8_t sensorsCount{};
   RET_FAIL(bs.Read(sensorsCount));
   RET_FAIL(sensorsCount <= SENSORS_COUNT);
-  thread_local std::vector<SensorsControlStates> states{};
-  states.resize(sensorsCount);
-  for (auto &sensor: states) {
+  for (uint8_t i = 0; i < sensorsCount; i++) {
+    SensorsControlStates sensor{};
     RET_FAIL(sensor.deserialize(bs));
   }
   if (sensorsCount > 0) {
@@ -616,18 +615,16 @@ bool ParseVehicleInfo(ParserState &state, danet::BitStream &bs, TankRef *ref, bo
   uint8_t counterMeasuresCount;
   RET_FAIL(bs.Read(counterMeasuresCount));
   RET_FAIL(counterMeasuresCount <= COUNTER_MEASURES_COUNT);
-  thread_local std::vector<CounterMeasuresControlState> counterMeasures{};
-  counterMeasures.resize(counterMeasuresCount);
-  for (auto &c: counterMeasures) {
-    RET_FAIL(c.deserialize(bs));
+  for (uint8_t i = 0; i < counterMeasuresCount; i++) {
+    CounterMeasuresControlState counter_measure{};
+    RET_FAIL(counter_measure.deserialize(bs));
   }
   uint8_t targetsNum = 0;
   RET_FAIL(bs.ReadBits(&targetsNum, 4));
   RET_FAIL(targetsNum <= 8);
-  thread_local std::vector<TargetDesignationControlState> targets{};
-  targets.resize(targetsNum);
-  for (auto &t: targets) {
-    RET_FAIL(t.deserialize(bs));
+  for (uint8_t i = 0; i < targetsNum; i++) {
+    TargetDesignationControlState target{};
+    RET_FAIL(target.deserialize(bs));
   }
   if (ref->ref_1) {
     ref->ref_1->calculateTurretData();
@@ -640,11 +637,7 @@ bool ParseVehicleInfo(ParserState &state, danet::BitStream &bs, TankRef *ref, bo
         LOGI("  gun:  ({}) ({})", turret->gun->turret_rel.toString(0), turret->gun->turret_abs.toString(0));
       }
     }*/
-    for (auto &weapon: ref->ref_1->weapons) {
-      if (weapon.turret_desc) {
-        weapon.turret_desc->push_curr_state(state);
-      }
-    }
+    ref->ref_1->recordTurretData(state);
   }
   return true;
 }
