@@ -451,8 +451,12 @@ namespace unit {
         return;
       }
       std::vector<LauncherInfo> launchers{}; // thats what they technically are idduno deal with it
-      // blkPrint(weapon_preset);
+      const int presetWeaponNid = weapon_preset->getNameId("Weapon");
+      const int presetLowercaseWeaponNid = weapon_preset->getNameId("weapon");
       for (int i = 0; i < weapon_preset->blockCount(); i++) {
+        const int blockNameId = weapon_preset->getBlock(i)->getBlockNameId();
+        if (blockNameId != presetWeaponNid && blockNameId != presetLowercaseWeaponNid)
+          continue;
         const DataBlock *curr_weapon_slot = nullptr, *curr_weapon_preset = nullptr;
         int tier = -1;
         int slot = -1;
