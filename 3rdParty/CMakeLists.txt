@@ -1,5 +1,10 @@
 include(FetchContent)
 
+if (NOT EMSCRIPTEN)
+    mimalloc_enable_sanitizer_options()
+    add_subdirectory(mimalloc-3.3.2 EXCLUDE_FROM_ALL)
+endif ()
+
 add_subdirectory(arc)
 add_subdirectory(eastl)
 add_subdirectory(hash)

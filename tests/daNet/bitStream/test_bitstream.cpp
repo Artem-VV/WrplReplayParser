@@ -130,6 +130,17 @@ TEST_CASE("BitStream growth preserves written data", "[bitstream][allocator]") {
   CHECK(stream.GetNumberOfUnreadBits() == 0);
 }
 
+TEST_CASE("BitStream growth copies a borrowed buffer", "[bitstream][allocator]") {
+  StateAllocator state;
+  const std::array<uint8_t, 2> input{0xA5, 0x5A};
+  danet::BitStream stream(input.data(), input.size(), false, state.getMem());
+  stream.Write(uint8_t{0x42});
+
+  REQUIRE(stream.GetData() != input.data());
+  CHECK(std::equal(input.begin(), input.end(), stream.GetData()));
+  CHECK(stream.GetData()[input.size()] == 0x42);
+}
+
 TEST_CASE("Allocator aligned buffers use paired release", "[allocator]") {
   GLOBAL_ALLOC global;
   StateAllocator state;

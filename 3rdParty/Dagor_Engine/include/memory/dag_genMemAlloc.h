@@ -4,6 +4,14 @@
 //
 #pragma once
 
+#if !defined(ASAN_ENABLED) && !defined(USE_MI_HEAP)
+#define USE_MI_HEAP 1
+#endif
+
+#if USE_MI_HEAP == 1
+#include "mimalloc.h"
+#endif
+
 #include "stdlib.h"
 #if defined(_WIN32)
 #include <malloc.h>
@@ -22,39 +30,64 @@ struct GLOBAL_ALLOC : public IMemAlloc {
   void destroy() override {}
   bool isEmpty() override { return true; }
   void *alloc(size_t sz) override {
+#if USE_MI_HEAP == 1
+    return mi_malloc(sz);
+#else
     return malloc(sz);
+#endif
   }
 
   void *tryAlloc(size_t sz) override {
+#if USE_MI_HEAP == 1
+    return mi_malloc(sz);
+#else
     return malloc(sz);
+#endif
   }
   size_t getSize(void *p) override { return 0; }
   void freeAligned(void *p) override {
-#if defined(_WIN32)
+#if USE_MI_HEAP == 1
+    return mi_free(p);
+#elif defined(_WIN32)
     return _aligned_free(p);
 #else
-    return free(p);
+    return ::free(p);
 #endif
   }
 
   void *allocAligned(size_t n, size_t al) override {
-#if defined(_WIN32)
+#if USE_MI_HEAP == 1
+    return mi_malloc_aligned(n, al);
+#elif defined(_WIN32)
     return _aligned_malloc(n, al);
 #else
-    return ::aligned_alloc(al, n);
+    void *p = nullptr;
+    return ::posix_memalign(&p, al < sizeof(void *) ? sizeof(void *) : al, n) == 0 ? p : nullptr;
 #endif
   }
 
   void free(void *p) override {
+#if USE_MI_HEAP == 1
+    return mi_free(p);
+#else
     return ::free(p);
+#endif
   }
 
   bool resizeInplace(void *p, size_t sz) override {
+#if USE_MI_HEAP == 1
+    return mi_expand(p, sz) != nullptr;
+#else
     return false;
+#endif
   }
 
   void *realloc(void *p, size_t sz) override {
+#if USE_MI_HEAP == 1
+    return mi_realloc(p, sz);
+#else
     return ::realloc(p, sz);
+#endif
   }
 };
 

@@ -1,19 +1,7 @@
-file(READ "src/lib/libdwarf/CMakeLists.txt" content)
-message("PATCHING LIBDWARF")
-
-if (content MATCHES "TARGETS[ \t]+dwarf[ \t]+zlibstatic zlib")
-    message(STATUS "zlib already present on TARGETS dwarf line; skipping patch.")
-else ()
-    if (content MATCHES "TARGETS[ \t]+dwarf")
-        string(REPLACE
-                "  TARGETS dwarf"
-                "  TARGETS dwarf zlibstatic zlib"
-                patched_content
-                "${content}"
-        )
-        file(WRITE "src/lib/libdwarf/CMakeLists.txt" "${patched_content}")
-        message(STATUS "Added zlib to TARGETS dwarf.")
-    else ()
-        message(WARNING "Did not find expected 'TARGETS dwarf' line; no changes made.")
-    endif ()
+set(dwarf_cmake "src/lib/libdwarf/CMakeLists.txt")
+file(READ "${dwarf_cmake}" content)
+string(REGEX REPLACE "(export\\([\r\n]+[ \t]*TARGETS[ \t]+dwarf)[^\r\n]*"
+        "\\1 zlibstatic zlib ZSTD" patched_content "${content}")
+if (NOT patched_content STREQUAL content)
+    file(WRITE "${dwarf_cmake}" "${patched_content}")
 endif ()

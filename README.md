@@ -28,10 +28,12 @@ tests
 
 ## wtapi builds
 
-Set `CMAKE_CXX_FLAGS=-DUSE_MI_HEAP=0` and `MI_OVERRIDE=OFF` in the inherited
-`FLAGS` of the local `cmake-build/cmake_config.json`. BitStream uses
-`malloc/realloc`, so its buffers must be freed by the same C runtime.
-Rebuild all C++ objects when changing allocator flags.
+Native builds use mimalloc 3.3.2 by default, with a dedicated heap for each
+`ParserState`. `MI_OVERRIDE` defaults to `OFF`.
+For a system allocator build, set `CMAKE_CXX_FLAGS=-DUSE_MI_HEAP=0` and
+`MI_OVERRIDE=OFF` in the inherited `FLAGS` of the local
+`cmake-build/cmake_config.json`. Rebuild all C++ objects when changing
+allocator flags.
 
 Enable native tests with `-DPARSER_ENABLE_TESTS=ON`, build `test_bitstream`
 and `test_rle`, then run `ctest --output-on-failure` in the build directory.

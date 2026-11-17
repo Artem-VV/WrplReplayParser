@@ -15,6 +15,10 @@ target_link_libraries(dag_math
         LOGGER::LOGGER
 )
 
+if(NOT EMSCRIPTEN)
+    target_link_libraries(dag_math mimalloc-static)
+endif ()
+
 set(INCLUDES
 
         "${BASE_DIR}/3rdParty/Dagor_Engine/include"
