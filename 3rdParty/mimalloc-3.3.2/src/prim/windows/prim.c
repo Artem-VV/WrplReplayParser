@@ -818,7 +818,14 @@ static void NTAPI mi_win_main(PVOID module, DWORD reason, LPVOID reserved) {
   #endif
 
   typedef int (mi_cdecl* mi_crt_callback_t)(void);
-  #if defined(_WIN64)
+  #if defined(__MINGW32__)
+    __attribute__((section(".CRT$XLB"), used))
+    static PIMAGE_TLS_CALLBACK mi_tls_callback_pre = &mi_tls_attach;
+    __attribute__((section(".CRT$XLY"), used))
+    static PIMAGE_TLS_CALLBACK mi_tls_callback_post = &mi_tls_detach;
+    __attribute__((section(".CRT$XIB"), used))
+    static mi_crt_callback_t mi_crt_callback_init = &mi_crt_init;
+  #elif defined(_WIN64)
     #pragma comment(linker, "/INCLUDE:_tls_used")
     #pragma comment(linker, "/INCLUDE:_mi_tls_callback_pre")
     #pragma comment(linker, "/INCLUDE:_mi_tls_callback_post")
