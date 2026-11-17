@@ -193,7 +193,7 @@ namespace mpi {
   IObject *MpiQueueObject::UnitRef_Dispatch(ObjectID oid, ObjectExtUID extUid, ParserState *state, bool do_queue) {
     ZoneScoped;
     if (!extUid) {
-      EXCEPTION("dispatch: extended mpi uid is not set for object of type {}", oid >> 0xb);
+      EXCEPTION("dispatch: extended mpi uid is not set for object of type {}", get_object_type(oid));
     }
 
     auto eid = ecs::EntityId(extUid);
@@ -215,7 +215,7 @@ namespace mpi {
     if (!ref->unit)
       return nullptr;
     auto unit = ref->unit;
-    auto obj_type = oid >> 0xb;
+    auto obj_type = get_object_type(oid);
     if (obj_type == FMW && unit->unitType == UnitType::AircraftType) {
       return unit->base_data;
     }
@@ -277,7 +277,7 @@ namespace mpi {
   IObject *MpiQueueObject::ObjectDispatcher(ObjectID oid, ObjectExtUID extUid, ParserState *state) {
     ZoneScoped;
     uint16_t count = oid & 0x7ff;
-    uint8_t obj = (uint8_t) (oid >> 0xb);
+    const auto obj = get_object_type(oid);
     switch (obj) {
       case FMW:
       case GM:

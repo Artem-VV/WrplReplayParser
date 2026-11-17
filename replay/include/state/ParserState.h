@@ -116,12 +116,12 @@ protected:
   bool use_enabled_oids = false;
   /// array of enabled object IDs see mpi::MpiQueueObject::ObjectDispatcher on how various oids are used
   /// this controls both what objects can be dispatched for base mpi and reflection
-  std::array<bool, mpi::ExtMpiTypes::WEAP> enabled_oids = {true};
+  std::array<bool, mpi::ExtMpiTypes::WEAP + 1> enabled_oids = {true};
 
   bool use_enabled_reflection_oids = false;
 
   /// oid whitelist, but for reflection dispatch instead
-  std::array<bool, mpi::ExtMpiTypes::WEAP> enabled_reflection_oids = {false};
+  std::array<bool, mpi::ExtMpiTypes::WEAP + 1> enabled_reflection_oids = {false};
 
   bool use_disabled_mids = false;
   std::unordered_set<mpi::MessageID> disabled_mids{};

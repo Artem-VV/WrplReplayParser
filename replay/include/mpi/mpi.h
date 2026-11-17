@@ -28,6 +28,8 @@ namespace mpi // message passing interface
   typedef uint16_t MessageID;
   typedef uint8_t SystemID;
 
+  constexpr uint8_t get_object_type(ObjectID oid) { return static_cast<uint8_t>(oid >> 11); }
+
   typedef IObject *(*object_dispatcher)(ObjectID, ObjectExtUID, ParserState *);
   extern object_dispatcher obj_dispatcher;
 
