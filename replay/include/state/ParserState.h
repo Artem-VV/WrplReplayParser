@@ -96,8 +96,8 @@ struct ParserConfig {
     /// mpi type 0xd039
     bool parse_replication = true;
 
-    /// do we parse kill, severe damage, critical damage,and award messages?
-    /// mpi type 0xf058, 0xf157, 0xf056, 0xf078
+    /// do we parse kill, severe damage, critical damage, award and bailout messages?
+    /// mpi type 0xf058, 0xf157, 0xf056, 0xf078, 0xf050
     bool parse_battle_message = true;
 
     /// do we parse the weapon syncs of rockets, bombs, and torpedoes?
@@ -255,6 +255,8 @@ public:
   const auto &getChatMessages() const { return this->chatMessages; }
   const auto &getGlobalElo() const { return this->glob_elo; }
   const auto &getGeneralState() const { return this->gen_state; }
+  void recordBattleMessage(const mpi::IBattleMessage *message);
+  void recordBailout(mpi::ObjectExtUID entity_id);
   const auto &getBattleMessages() const { return this->BattleMessages; }
   const auto &getHitAffects() const { return this->HitEffects; }
   const auto &getHitAnalysis() const { return this->HitAnalyses; }
@@ -310,6 +312,7 @@ protected:
   GlobalElo glob_elo{this};
   GeneralState gen_state{this};
   std::pmr::vector<const mpi::IBattleMessage *> BattleMessages{get_allocator()};
+  std::pmr::vector<mpi::ObjectExtUID> bailout_entities{get_allocator()};
   // Shot and hit packets, one list per message and nothing joined: a record here
   // is what the packet said. See mpi/GeneralObject.h for what joins to what.
   std::pmr::vector<mpi::HitEffect> HitEffects{get_allocator()};

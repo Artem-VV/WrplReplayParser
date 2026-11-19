@@ -13,7 +13,6 @@
 CREATE_HANDLE(handle_object_dispatcher, "ObjectDispatcher")
 
 struct SHARE_STRUCT(ObjectDispatcher) {
-  static auto &BattleMessages(ParserState &state) { return parserInt::ParserShare::get_battle_messages(state); }
   static auto &EntityManager(ParserState &state) { return parserInt::ParserShare::get_ecs(state); }
 };
 
@@ -129,7 +128,7 @@ namespace mpi {
       case MPI_PACKETS::Awards: {
         m->delete_message = false;
         const IBattleMessage *battle_m = dynamic_cast<const IBattleMessage *>(m);
-        alias::BattleMessages(*state).push_back(battle_m);
+        state->recordBattleMessage(battle_m);
         break;
       }
       case MPI_PACKETS::ReflectionNoDecompress: {

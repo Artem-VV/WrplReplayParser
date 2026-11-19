@@ -219,6 +219,12 @@ namespace mpi {
         if (object_type >= config.enabled_oids.size() || !config.enabled_oids[object_type])
           return nullptr;
       }
+      if (mid == MPI_PACKETS::UnitBailoutResponse) {
+        if (config.battle_messages_enabled())
+          state->recordBailout(extUid);
+        return nullptr;
+      }
+
       IObject *o = dispatch_object(oid, extUid, state);
       if (o) {
         Message *m = (mid != INVALID_MESSAGE_ID) ? o->dispatchMpiMessage(mid) : nullptr;

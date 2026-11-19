@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <ranges>
 #include "math/dag_TMatrix.h"
 #include "state/ParserState.h"
 
@@ -85,7 +86,11 @@ namespace mpi {
         }
         case 3: {
           RET_FAIL(bs->Read(victim_uid));
+          if (auto eid = state->getUnitEid(victim_uid); eid)
+            this->offended_entity_id = eid.get_handle();
           this->offended_unit = state->getUnitObj(victim_uid);
+          if (offended_unit && offended_unit->killed_at_ms != 0xFFFFFFFF)
+            previous_death_ms = offended_unit->killed_at_ms;
           break;
         }
         case 4: {
@@ -183,6 +188,55 @@ namespace mpi {
       offender_unit_position = offender_unit->positions.history().back().data.location;
     }
     return true;
+  }
+
+  void KillMessage::linkBailout(const ParserState &state) const {
+    if (bailed_out || !destroyed_weapon.empty())
+      return;
+
+    bailed_out = true;
+    const auto *victim = offended_unit;
+    if (!victim || offender_pid < 0)
+      return;
+
+    // The same unit entity can be reused on respawn.
+    uint32_t first_ms = victim->created_at_ms;
+    if (previous_death_ms)
+      first_ms = std::max(first_ms, *previous_death_ms + 1);
+
+    auto has_record = [&](const auto &records, auto predicate) {
+      for (const auto &record: std::views::reverse(records)) {
+        if (record.time_ms < first_ms)
+          break;
+        if (record.time_ms < time_ms && record.offended_unit == victim && record.offender_unit &&
+            record.offender_unit->owner_pid == offender_pid && predicate(record))
+          return true;
+      }
+      return false;
+    };
+    auto is_hit = [](const auto &) { return true; };
+    prior_damage = has_record(state.getHitAffects(), is_hit) || has_record(state.getHitAnalysis(), is_hit) ||
+                   has_record(state.getHitDamages(), [](const HitDamage &hit) { return hit.amount > 0; });
+    if (*prior_damage)
+      return;
+
+    // The report carries the attacker's player slot even when the vehicle is unresolved.
+    auto is_credited_damage = [&](const auto &report) {
+      return report.offended_unit == victim && report.player_pid == offender_pid;
+    };
+    for (const auto *message: std::views::reverse(state.getBattleMessages())) {
+      if (message->time_ms < first_ms)
+        break;
+      if (message->time_ms >= time_ms)
+        continue;
+      if ((message->id == MPI_PACKETS::CriticalDamage &&
+           is_credited_damage(static_cast<const CriticalDamageMessage &>(*message))) ||
+          (message->id == MPI_PACKETS::SevereDamage &&
+           is_credited_damage(static_cast<const SevereDamageMessage &>(*message)))) {
+        prior_damage = true;
+        break;
+      }
+    }
   }
 
   bool CriticalDamageMessage::readPayload(ParserState *state) {

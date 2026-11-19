@@ -14,7 +14,6 @@ namespace parserInt {
   protected:
     static ecs::EntityManager &get_ecs(ParserState &state) { return state.g_entity_mgr; }
     static auto &get_unit_allocator(ParserState &state) { return state._unit_allocator; }
-    static auto &get_battle_messages(ParserState &state) { return state.BattleMessages; }
     static auto &get_m_players(ParserState &state) { return state.players; }
     template<typename... Args>
     static void recordTeamSpawnSide(ParserState &state, Args &&...args) {

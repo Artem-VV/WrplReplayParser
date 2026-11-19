@@ -4,6 +4,7 @@
 #define WTFILEUTILS_GENERALOBJECT_H
 #include "mpi.h"
 #include <map>
+#include <optional>
 #include <string>
 #include "math/dag_Point2.h"
 #include "math/dag_Point3.h"
@@ -14,6 +15,7 @@ namespace MPI_PACKETS {
     CriticalDamage = 0xf056,
     Kill = 0xf058,
     Awards = 0xf078,
+    UnitBailoutResponse = 0xf050,
     Action = 0xf028,
     Replication = 0xd039,
     ReflectionNoDecompress = 0xf0aa,
@@ -91,6 +93,7 @@ namespace mpi {
     // virtual std::string read_basic_message() = 0;
     // virtual std::string read_extended_message() = 0;
   };
+
   enum WeaponType : uint8_t {
     IsBullet = 1, // I presume, this is the only  case not covered
     IsBomb = 2,
@@ -109,6 +112,11 @@ namespace mpi {
 
   class KillMessage : public IBattleMessage {
     bool readPayload(ParserState *state) override;
+    void linkBailout(const ParserState &state) const;
+
+    std::optional<ObjectExtUID> offended_entity_id;
+    std::optional<uint32_t> previous_death_ms;
+    friend struct ::ParserState;
 
   public:
     KillMessage(IObject *o) : IBattleMessage(o, MPI_PACKETS::Kill) {}
@@ -130,6 +138,9 @@ namespace mpi {
     std::string weird_str_2{};
     uint32_t weird_val_3{};
     std::string weird_str_4{};
+
+    mutable bool bailed_out = false;
+    mutable std::optional<bool> prior_damage;
   };
 
   class CriticalDamageMessage : public IBattleMessage {

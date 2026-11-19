@@ -3,6 +3,8 @@
 #include "mpi/PositionSync.h"
 #include "utils.h"
 #include "ioSys/dag_dataBlock.h"
+#include <algorithm>
+#include <ranges>
 
 namespace {
   // warthunder offsets all y offsets by the sea level. on most maps, this is 0, but some, like Pradesh, have a
@@ -222,6 +224,8 @@ ParserState::~ParserState() {
 bool ParserState::ParsePacket(ReplayPacket &pkt) {
   ZoneScoped;
   beforePacket(pkt);
+  if (pkt.timestamp_ms != curr_time_ms)
+    bailout_entities.clear();
   curr_time_ms = pkt.timestamp_ms;
   current_packet_index++;
   switch (pkt.type) {
@@ -272,6 +276,33 @@ bool ParserState::ParsePacket(ReplayPacket &pkt) {
     case ReplayPacketType::ReplayHeaderInfo: break;
   }
   return true;
+}
+
+void ParserState::recordBattleMessage(const mpi::IBattleMessage *message) {
+  if (message->id == MPI_PACKETS::Kill) {
+    const auto &kill = static_cast<const mpi::KillMessage &>(*message);
+    if (kill.offended_entity_id &&
+        std::ranges::find(bailout_entities, *kill.offended_entity_id) != bailout_entities.end())
+      kill.linkBailout(*this);
+  }
+  BattleMessages.push_back(message);
+}
+
+void ParserState::recordBailout(mpi::ObjectExtUID entity_id) {
+  if (entity_id == mpi::INVALID_OBJECT_EXT_UID)
+    return;
+
+  // Match the same entity and timestamp regardless of packet order.
+  bailout_entities.push_back(entity_id);
+  for (const auto *message: std::views::reverse(BattleMessages)) {
+    if (message->time_ms != curr_time_ms)
+      break;
+    if (message->id != MPI_PACKETS::Kill)
+      continue;
+    const auto &kill = static_cast<const mpi::KillMessage &>(*message);
+    if (kill.offended_entity_id == entity_id)
+      kill.linkBailout(*this);
+  }
 }
 
 void ParserState::rewindToMs(uint32_t time_ms) {

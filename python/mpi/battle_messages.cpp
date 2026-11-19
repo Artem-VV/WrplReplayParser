@@ -39,7 +39,12 @@ void PyBattleMessages::include(py::module_ &m) {
       .def_readonly("weapon_flags", &mpi::KillMessage::some_weap_flags,
                     "Bit flags of the killing weapon: bit 0 artillery, bit 1 depth bomb, bit 2 mine, "
                     "bit 5 unknown. Only bit 5 (value 32) was seen on the test replays, on gun kills "
-                    "of ground vehicles; bit 0 is the flag an artillery strike would be read by.");
+                    "of ground vehicles; bit 0 is the flag an artillery strike would be read by.")
+      .def_readonly("bailed_out", &mpi::KillMessage::bailed_out,
+                    "Whether the victim bailed out.")
+      .def_readonly("prior_damage", &mpi::KillMessage::prior_damage,
+                    "A recorded hit or damage by the credited player during the victim's current life before the kill. "
+                    "None without a credited bailout and a resolved victim.");
 
   py::class_<mpi::SevereDamageMessage, mpi::IBattleMessage, std::unique_ptr<mpi::SevereDamageMessage, py::nodelete>>(
       mpi, "SevereDamageMessage")
