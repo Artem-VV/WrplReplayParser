@@ -89,8 +89,6 @@ namespace mpi {
           if (auto eid = state->getUnitEid(victim_uid); eid)
             this->offended_entity_id = eid.get_handle();
           this->offended_unit = state->getUnitObj(victim_uid);
-          if (offended_unit && offended_unit->killed_at_ms != 0xFFFFFFFF)
-            previous_death_ms = offended_unit->killed_at_ms;
           break;
         }
         case 4: {
@@ -187,22 +185,24 @@ namespace mpi {
     if (offender_unit && !offender_unit->positions.history().empty()) {
       offender_unit_position = offender_unit->positions.history().back().data.location;
     }
+    readPriorDamage(*state);
     return true;
   }
 
-  void KillMessage::linkBailout(const ParserState &state) const {
-    if (bailed_out || !destroyed_weapon.empty())
-      return;
+  void KillMessage::linkBailout() const {
+    if (destroyed_weapon.empty())
+      bailed_out = true;
+  }
 
-    bailed_out = true;
+  void KillMessage::readPriorDamage(const ParserState &state) {
     const auto *victim = offended_unit;
-    if (!victim || offender_pid < 0)
+    if (!victim || offender_pid < 0 || !destroyed_weapon.empty())
       return;
 
     // The same unit entity can be reused on respawn.
     uint32_t first_ms = victim->created_at_ms;
-    if (previous_death_ms)
-      first_ms = std::max(first_ms, *previous_death_ms + 1);
+    if (victim->killed_at_ms != 0xFFFFFFFF)
+      first_ms = std::max(first_ms, victim->killed_at_ms + 1);
 
     auto has_record = [&](const auto &records, auto predicate) {
       for (const auto &record: std::views::reverse(records)) {

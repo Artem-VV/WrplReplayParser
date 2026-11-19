@@ -44,7 +44,7 @@ void PyBattleMessages::include(py::module_ &m) {
                     "Whether the victim bailed out.")
       .def_readonly("prior_damage", &mpi::KillMessage::prior_damage,
                     "A recorded hit or damage by the credited player during the victim's current life before the kill. "
-                    "None without a credited bailout and a resolved victim.");
+                    "None if the kill has no credited player or resolved victim, or if it targets a weapon.");
 
   py::class_<mpi::SevereDamageMessage, mpi::IBattleMessage, std::unique_ptr<mpi::SevereDamageMessage, py::nodelete>>(
       mpi, "SevereDamageMessage")

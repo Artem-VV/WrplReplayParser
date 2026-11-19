@@ -283,7 +283,7 @@ void ParserState::recordBattleMessage(const mpi::IBattleMessage *message) {
     const auto &kill = static_cast<const mpi::KillMessage &>(*message);
     if (kill.offended_entity_id &&
         std::ranges::find(bailout_entities, *kill.offended_entity_id) != bailout_entities.end())
-      kill.linkBailout(*this);
+      kill.linkBailout();
   }
   BattleMessages.push_back(message);
 }
@@ -301,7 +301,7 @@ void ParserState::recordBailout(mpi::ObjectExtUID entity_id) {
       continue;
     const auto &kill = static_cast<const mpi::KillMessage &>(*message);
     if (kill.offended_entity_id == entity_id)
-      kill.linkBailout(*this);
+      kill.linkBailout();
   }
 }
 

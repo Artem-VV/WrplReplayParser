@@ -112,10 +112,10 @@ namespace mpi {
 
   class KillMessage : public IBattleMessage {
     bool readPayload(ParserState *state) override;
-    void linkBailout(const ParserState &state) const;
+    void readPriorDamage(const ParserState &state);
+    void linkBailout() const;
 
     std::optional<ObjectExtUID> offended_entity_id;
-    std::optional<uint32_t> previous_death_ms;
     friend struct ::ParserState;
 
   public:
@@ -140,7 +140,7 @@ namespace mpi {
     std::string weird_str_4{};
 
     mutable bool bailed_out = false;
-    mutable std::optional<bool> prior_damage;
+    std::optional<bool> prior_damage;
   };
 
   class CriticalDamageMessage : public IBattleMessage {
